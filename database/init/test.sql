@@ -1,0 +1,1 @@
+SELECT 'INIT OK' AS test;

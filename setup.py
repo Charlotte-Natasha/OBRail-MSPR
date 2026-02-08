@@ -137,6 +137,9 @@ def check_required_files():
         "scripts/clean_routes.py": "Routes transformation and cleaning",
         "scripts/emissions.py": "CO2 emissions extraction",
         "scripts/calculate_co2.py": "Environmental impact calculation",
+        "scripts/night_trains.py": "Night trains extraction",
+        "scripts/day_trains.py": "Day trains extraction",
+        "scripts/clean_routes.py": "Data transformation",
         "main.py": "Main pipeline orchestrator",
     }
     
