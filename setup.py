@@ -118,8 +118,8 @@ def check_required_files():
     
     required_files = {
         "config/settings.py": "Configuration settings",
-        "scripts/night_routes.py": "Night routes extraction",
-        "scripts/day_routes.py": "Day routes extraction",
+        "scripts/night_trains.py": "Night trains extraction",
+        "scripts/day_trains.py": "Day trains extraction",
         "scripts/clean_routes.py": "Data transformation",
         "main.py": "Main pipeline orchestrator",
     }
