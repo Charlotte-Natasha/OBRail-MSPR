@@ -3,11 +3,11 @@ version: "3.9"
 services:
   postgres:
     image: postgres:15
-    container_name: datamart_co2_pg
+    container_name: obrail_datamart_pg
     environment:
       POSTGRES_DB: datamart_co2
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: obrail
+      POSTGRES_PASSWORD: obrail123
     ports:
       - "5432:5432"
     volumes:
