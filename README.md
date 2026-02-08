@@ -32,3 +32,8 @@ german railways -
 From 2018-12-09 to 2019-12-14.
 
 co2 - https://energy.ec.europa.eu/data-and-analysis/eu-energy-statistical-pocketbook-and-country-datasheets_en
+
+# Requirements
+- Python 3.10+
+- Java 17 or Java 21 (required by PySpark)
+- PySpark 3.5.x

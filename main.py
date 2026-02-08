@@ -60,8 +60,27 @@ def run_extraction_phase():
     print(f"\n✅ EXTRACTION phase completed in {time.time() - start_time:.2f} seconds")
     return True
 
+# PHASE 3: EXTRACT CO2 REFERENCE DATA
 
-# PHASE 2: TRANSFORM
+def extract_co2_reference_data():
+    """Extract CO2 emission factors from Back-on-Track data"""
+    print_header("PHASE 1.5: CO2 REFERENCE - Extracting Emission Factors")
+    
+    start_time = time.time()
+    
+    print("📊 Extracting CO2 emission factors...")
+    try:
+        from scripts import emissions
+        emissions.main()
+        print("✓ CO2 emission factors extracted")
+    except Exception as e:
+        print(f"✗ Error extracting CO2 data: {str(e)}")
+        return False
+    
+    print(f"\n✅ CO2 REFERENCE phase completed in {time.time() - start_time:.2f} seconds")
+    return True
+
+# PHASE 3: TRANSFORM
 
 def run_transformation_phase():
     print_header("PHASE 2: TRANSFORM - Cleaning and Standardizing Data")
@@ -79,8 +98,27 @@ def run_transformation_phase():
     print(f"\n✅ TRANSFORMATION phase completed in {time.time() - start_time:.2f} seconds")
     return True
 
+# PHASE 4: ENVIRONMENTAL IMPACT ANALYSIS
 
-# PHASE 3: LOAD (Future)
+def calculate_environmental_impact():
+    """Calculate CO2 emissions for each route"""
+    print_header("PHASE 2.5: ENVIRONMENTAL IMPACT - Calculating CO2 per Route")
+    
+    start_time = time.time()
+    
+    print("🌍 Calculating environmental impact...")
+    try:
+        from scripts import calculate_co2
+        calculate_co2.main()
+        print("✓ Environmental impact calculated")
+    except Exception as e:
+        print(f"✗ Error calculating CO2: {str(e)}")
+        return False
+    
+    print(f"\n✅ ENVIRONMENTAL IMPACT phase completed in {time.time() - start_time:.2f} seconds")
+    return True
+
+# PHASE 5: LOAD (Future)
 
 def run_loading_phase():
     """Execute the loading phase - placeholder for future implementation"""
@@ -132,7 +170,8 @@ def generate_summary_report():
         "night_routes_cleaned.csv",
         "all_routes_cleaned.csv",
         "emissions_reference.csv",
-        "emissions_summary.csv"
+        "emissions_summary.csv",
+        "environmental_impact.csv"
     ]
 
     print("🔧 Transformed data:")
@@ -170,11 +209,19 @@ def main():
     if not run_extraction_phase():
         print("\n❌ ETL Pipeline FAILED at EXTRACTION phase")
         sys.exit(1)
+        
+    # Phase 1.5: Extract CO2 reference 
+    if not extract_co2_reference_data():
+        sys.exit(1)    
     
     # Phase 2: Transform
     if not run_transformation_phase():
         print("\n❌ ETL Pipeline FAILED at TRANSFORMATION phase")
         sys.exit(1)
+        
+    # Phase 2.5: Calculate environmental impact ← ADD THIS
+    if not calculate_environmental_impact():
+        sys.exit(1)    
     
     # Phase 3: Load (placeholder)
     if not run_loading_phase():
