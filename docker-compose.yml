@@ -1,26 +1,38 @@
-version: '3.8'
 services:
-  db:
+  obrail_db:
     image: postgres:15
-    container_name: obrail_postgres
-    environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: password123
-      POSTGRES_DB: obrail_db
+    container_name: obrail_postgres_db
+    env_file:
+      - .env
     ports:
-      - "5432:5432"
+      - "5433:5432"                    #  Exposes to host
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./database/init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data  # ←  Persists data
+    networks:
+      - obrail_network
+    healthcheck:                       # Checks if DB is ready
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  api:
-    build: .
-    container_name: obrail_api
-    ports:
-      - "8000:8000"
-    environment:
-      DATABASE_URL: postgresql://admin:password123@db:5432/obrail_db
-    depends_on:
-      - db
+  # API service - uncomment when ready
+  # obrail_api:
+  #   build: .
+  #   container_name: obrail_api_service
+  #   depends_on:
+  #     obrail_db:
+  #       condition: service_healthy   # ← Wait for DB to be ready
+  #   env_file:
+  #     - .env
+  #   ports:
+  #     - "8000:8000"
+  #   networks:
+  #     - obrail_network
 
-volumes:
+networks:
+  obrail_network:
+
+volumes:                               # Volume definition
   postgres_data:
