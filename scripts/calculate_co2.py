@@ -18,9 +18,9 @@ Author: ObRail Europe Data Team
 import pandas as pd
 import os
 
-# ----------------------------
+
 # CONFIGURATION
-# ----------------------------
+
 ROUTES_FILE = "data/transformed/all_routes_cleaned.csv"
 CO2_REFERENCE_FILE = "data/transformed/emissions_reference.csv"
 OUTPUT_FILE = "data/transformed/environmental_impact.csv"
@@ -33,9 +33,9 @@ DEFAULT_EMISSION_FACTORS = {
     'car': 132
 }
 
-# ----------------------------
+
 # FUNCTION: Load emission factors
-# ----------------------------
+
 def load_emission_factors(file_path):
     """
     Load CO2 emission factors from reference file
@@ -187,9 +187,9 @@ def generate_summary_statistics(df):
         type_summary['co2_savings_tons'] = (type_summary['co2_savings_kg'] / 1000).round(2)
         print(type_summary[['route_count', 'co2_savings_tons']].to_string())
 
-# ----------------------------
+
 # MAIN FUNCTION
-# ----------------------------
+
 def main():
     """
     Main execution function

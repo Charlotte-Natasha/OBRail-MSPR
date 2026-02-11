@@ -8,11 +8,10 @@ Modify paths here to match your folder structure.
 
 import os
 
-# ----------------------------
-# PROJECT STRUCTURE CONFIGURATION
-# ----------------------------
 
-# Determine if scripts are in 'scripts/' folder or project root
+# PROJECT STRUCTURE CONFIGURATION
+
+# Determines if scripts are in 'scripts/' folder or project root
 # Set this to True if you put scripts in scripts/ folder
 SCRIPTS_IN_SUBFOLDER = False
 
@@ -22,14 +21,14 @@ if SCRIPTS_IN_SUBFOLDER:
 else:
     BASE_PATH = ""     # Scripts are in project root
 
-# ----------------------------
+
 # DIRECTORY PATHS
-# ----------------------------
 
 # Raw data directories
 RAW_DATA_DIR = os.path.join(BASE_PATH, "data/raw/")
 RAW_NIGHT_DIR = os.path.join(RAW_DATA_DIR, "night/")
 RAW_DAY_DIR = os.path.join(RAW_DATA_DIR, "day/")
+RAW_EMISSIONS_DIR = os.path.join(RAW_DATA_DIR, "co2/")
 
 # Processed data directories
 EXTRACTED_DIR = os.path.join(BASE_PATH, "data/extracted/")
@@ -38,12 +37,11 @@ TRANSFORMED_DIR = os.path.join(BASE_PATH, "data/transformed/")
 # Logs directory
 LOGS_DIR = os.path.join(BASE_PATH, "logs/")
 
-# ----------------------------
+
 # GTFS SOURCE FOLDERS
-# ----------------------------
 
 # Night train GTFS folders
-# Modify these based on what you actually downloaded
+
 GTFS_NIGHT_FOLDERS = [
     os.path.join(RAW_NIGHT_DIR, "Switzerland/"),
     os.path.join(RAW_NIGHT_DIR, "long_distance/"),
@@ -53,7 +51,7 @@ GTFS_NIGHT_FOLDERS = [
 ]
 
 # Day train GTFS folders
-# Modify these based on what you actually downloaded
+
 GTFS_DAY_FOLDERS = [
     os.path.join(RAW_DAY_DIR, "Denmark/"),
     os.path.join(RAW_DAY_DIR, "Eurostar_international/"),
@@ -62,9 +60,9 @@ GTFS_DAY_FOLDERS = [
     os.path.join(RAW_DAY_DIR, "Switzerland/"),
 ]
 
-# ----------------------------
+
 # OUTPUT FILE PATHS
-# ----------------------------
+
 
 # Extracted data files
 NIGHT_ROUTES_EXTRACTED = os.path.join(EXTRACTED_DIR, "night_routes.csv")
@@ -75,9 +73,24 @@ NIGHT_ROUTES_CLEANED = os.path.join(TRANSFORMED_DIR, "night_routes_cleaned.csv")
 DAY_ROUTES_CLEANED = os.path.join(TRANSFORMED_DIR, "day_routes_cleaned.csv")
 ALL_ROUTES_CLEANED = os.path.join(TRANSFORMED_DIR, "all_routes_cleaned.csv")
 
-# ----------------------------
+# CO2 emissions reference data
+CO2_EMISSIONS_REFERENCE = os.path.join(TRANSFORMED_DIR, "co2_emissions_reference.csv")
+CO2_EMISSIONS_SUMMARY = os.path.join(TRANSFORMED_DIR, "co2_emissions_summary.csv")
+
+# Routes with environmental impact
+ROUTES_ENVIRONMENTAL_IMPACT = os.path.join(TRANSFORMED_DIR, "all_routes_environmental_impact.csv")
+
+# Default emission factors (g CO2 per passenger-km)
+# Source: Back-on-Track 2022
+EMISSION_FACTORS = {
+    'train': 14,        # Night/day trains
+    'plane': 144,       # Airplane (without RF)
+    'plane_rf': 389,    # Airplane (with radiative forcing 3.0)
+    'car': 132,         # Large car (diesel)
+    'coach': 22         # Coach/bus
+}
+
 # COUNTRY MAPPING CONFIGURATION
-# ----------------------------
 
 # Country code per folder for night trains
 # None = cross-border, will be resolved per station
