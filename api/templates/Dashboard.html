@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ObRail Europe - Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .stat-card {
+            border-left: 4px solid #0d6efd;
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-train-front-fill"></i> ObRail Europe
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/routes-page">Routes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/countries-page">Countries</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/api/docs" target="_blank">
+                            <i class="bi bi-code-square"></i> API
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-4">
+                    <i class="bi bi-speedometer2 text-primary"></i> Dashboard
+                </h1>
+                <p class="lead text-muted">European Night Train Routes - Environmental Impact Analysis</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row g-4 mb-4">
+            
+            <!-- Total Routes -->
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Total Routes</h6>
+                                <h2 class="mb-0">{{ "{:,}".format(summary.total_routes) }}</h2>
+                            </div>
+                            <div class="text-primary fs-1">
+                                <i class="bi bi-train-front"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Countries Covered -->
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Countries</h6>
+                                <h2 class="mb-0">{{ summary.countries }}</h2>
+                            </div>
+                            <div class="text-success fs-1">
+                                <i class="bi bi-globe-europe-africa"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total CO2 Saved -->
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">CO₂ Saved</h6>
+                                <h2 class="mb-0">{{ "{:,.1f}".format(summary.total_co2_saved_tons) }}</h2>
+                                <small class="text-muted">tons</small>
+                            </div>
+                            <div class="text-success fs-1">
+                                <i class="bi bi-cloud-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Average Savings -->
+            <div class="col-md-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="text-muted mb-2">Avg. Savings</h6>
+                                <h2 class="mb-0">{{ "{:.1f}".format(summary.avg_savings_pct) }}%</h2>
+                                <small class="text-muted">vs airplane</small>
+                            </div>
+                            <div class="text-warning fs-1">
+                                <i class="bi bi-graph-up-arrow"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row g-4 mb-4">
+            
+            <!-- Top Routes Chart -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart-fill"></i> Top 10 Routes by CO₂ Savings
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="topRoutesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Countries Chart -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart-fill"></i> CO₂ Savings by Country
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="countriesChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Top Routes Table -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-trophy-fill"></i> Top 10 Routes
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Route</th>
+                                        <th>Countries</th>
+                                        <th class="text-end">Distance</th>
+                                        <th class="text-end">CO₂ Saved</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for route in top_routes %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <strong>{{ route[0] }}</strong>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ route[1] }}</span>
+                                            <i class="bi bi-arrow-right"></i>
+                                            <span class="badge bg-success">{{ route[2] }}</span>
+                                        </td>
+                                        <td class="text-end">{{ "{:,.0f}".format(route[3]) }} km</td>
+                                        <td class="text-end">
+                                            <strong class="text-success">{{ "{:,.1f}".format(route[4]) }} kg</strong>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-5">
+        <div class="container text-center text-muted">
+            <p class="mb-0">
+                <i class="bi bi-train-front"></i> ObRail Europe - MSPR Project 2026
+            </p>
+            <small>Environmental Impact Analysis of European Night Trains</small>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Chart.js Configuration -->
+    <script>
+        // Prepare data for charts from Jinja2 template
+        const topRoutesData = {
+            labels: [
+                {% for route in top_routes %}
+                "{{ route[0][:30] }}"{{ "," if not loop.last else "" }}
+                {% endfor %}
+            ],
+            values: [
+                {% for route in top_routes %}
+                {{ route[4] }}{{ "," if not loop.last else "" }}
+                {% endfor %}
+            ]
+        };
+
+        const countriesData = {
+            labels: [
+                {% for country in countries %}
+                "{{ country[0] }}"{{ "," if not loop.last else "" }}
+                {% endfor %}
+            ],
+            values: [
+                {% for country in countries %}
+                {{ country[2] }}{{ "," if not loop.last else "" }}
+                {% endfor %}
+            ]
+        };
+
+        // Top Routes Chart (Horizontal Bar)
+        const topRoutesCtx = document.getElementById('topRoutesChart');
+        new Chart(topRoutesCtx, {
+            type: 'bar',
+            data: {
+                labels: topRoutesData.labels,
+                datasets: [{
+                    label: 'CO₂ Saved (kg)',
+                    data: topRoutesData.values,
+                    backgroundColor: 'rgba(25, 135, 84, 0.7)',
+                    borderColor: 'rgba(25, 135, 84, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Countries Chart (Doughnut)
+        const countriesCtx = document.getElementById('countriesChart');
+        new Chart(countriesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: countriesData.labels,
+                datasets: [{
+                    label: 'CO₂ Saved (kg)',
+                    data: countriesData.values,
+                    backgroundColor: [
+                        '#0d6efd', '#198754', '#ffc107', '#dc3545', '#0dcaf0',
+                        '#6610f2', '#fd7e14', '#20c997', '#d63384', '#6c757d'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+# FastAPI - Modern web framework
+fastapi==0.104.1
+
+# Uvicorn - ASGI server
+uvicorn[standard]==0.24.0
+
+# SQLAlchemy - Database ORM
+sqlalchemy==2.0.23
+
+# PostgreSQL driver
+psycopg2-binary==2.9.9
+
+# Pydantic - Data validation
+pydantic==2.5.0
+
+# Python environment variables
+python-dotenv==1.0.0
+
+# Jinja2 - Template engine (for HTML pages)
+jinja2==3.1.2
+
+# Python multipart - For file uploads (if needed later)
+python-multipart==0.0.6
