@@ -5,210 +5,218 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Routes - ObRail Europe</title>
     
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     
     <style>
+        :root {
+            --rail-primary: #0d6efd; /* Solid Corporate Blue */
+            --rail-success: #198754; /* Environmental Green */
+            --bg-neutral: #f8f9fa;
+        }
+
         body {
-            background-color: #f8f9fa;
+            background-color: var(--bg-neutral);
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #212529;
         }
+
+        /* Solid Header for a serious look */
+        .navbar {
+            background-color: var(--rail-primary) !important;
+            border-bottom: 3px solid #0a58ca;
+            padding: 0.8rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        /* Filter Section Styling */
+        .filter-card {
+            border: none;
+            border-top: 4px solid var(--rail-primary);
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        /* Professional Route Cards */
         .route-card {
-            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #dee2e6;
+            border-radius: 4px; /* Sharper corners for a serious look */
+            background: #ffffff;
+            transition: all 0.2s ease-in-out;
         }
+
         .route-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-color: var(--rail-primary);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+        }
+
+        .route-header {
+            border-bottom: 1px solid #f1f1f1;
+            padding-bottom: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .route-title {
+            font-weight: 700;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        /* Visual connector for Origin -> Destination */
+        .route-path {
+            position: relative;
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        .route-path::before {
+            content: '';
+            position: absolute;
+            left: 5px;
+            top: 10px;
+            bottom: 10px;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .stat-box {
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            padding: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .impact-value {
+            font-weight: 800;
+            color: var(--rail-success);
+            font-size: 1.25rem;
+        }
+
+        .badge-type {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 0.5px;
         }
     </style>
 </head>
 <body>
     
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark shadow-sm">
         <div class="container">
             <a class="navbar-brand" href="/">
-                <i class="bi bi-train-front-fill"></i> ObRail Europe
+                <i class="bi bi-train-front-fill me-2"></i>OBRAIL EUROPE
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/routes-page">Routes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/countries-page">Countries</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/api/docs" target="_blank">
-                            <i class="bi bi-code-square"></i> API
-                        </a>
-                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/">Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/routes-page">Routes</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/countries-page">Countries</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/api/docs" target="_blank">API Access</a></li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
     <div class="container mt-4">
         
-        <!-- Page Header -->
         <div class="row mb-4">
-            <div class="col">
-                <h1 class="display-4">
-                    <i class="bi bi-train-front text-primary"></i> Routes
-                </h1>
-                <p class="lead text-muted">Browse European night train routes with environmental impact data</p>
+            <div class="col-lg-8">
+                <h1 class="fw-bold">Route Inventory</h1>
+                <p class="text-muted">Technical analysis of carbon mitigation across European rail corridors.</p>
             </div>
         </div>
 
-        <!-- Filters -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <form method="get" action="/routes-page">
-                            <div class="row g-3">
-                                <div class="col-md-4">
-                                    <label class="form-label">
-                                        <i class="bi bi-geo-alt-fill"></i> Filter by Country
-                                    </label>
-                                    <select name="country" class="form-select" onchange="this.form.submit()">
-                                        <option value="">All Countries</option>
-                                        {% for country in countries %}
-                                        <option value="{{ country }}" {% if country == selected_country %}selected{% endif %}>
-                                            {{ country }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">
-                                        <i class="bi bi-moon-stars-fill"></i> Filter by Type
-                                    </label>
-                                    <select name="train_type" class="form-select" onchange="this.form.submit()">
-                                        <option value="">All Types</option>
-                                        <option value="night" {% if selected_type == 'night' %}selected{% endif %}>Night Trains</option>
-                                        <option value="day" {% if selected_type == 'day' %}selected{% endif %}>Day Trains</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4 d-flex align-items-end">
-                                    <a href="/routes-page" class="btn btn-outline-secondary w-100">
-                                        <i class="bi bi-x-circle"></i> Clear Filters
-                                    </a>
-                                </div>
-                            </div>
-                        </form>
+        <div class="card filter-card mb-5">
+            <div class="card-body p-4">
+                <form method="get" action="/routes-page">
+                    <div class="row g-3 align-items-end">
+                        <div class="col-md-5">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Geographic Scope</label>
+                            <select name="country" class="form-select rounded-1" onchange="this.form.submit()">
+                                <option value="">All EU Territories</option>
+                                {% for country in countries %}
+                                <option value="{{ country }}" {% if country == selected_country %}selected{% endif %}>{{ country }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Service Profile</label>
+                            <select name="train_type" class="form-select rounded-1" onchange="this.form.submit()">
+                                <option value="">All Service Types</option>
+                                <option value="night" {% if selected_type == 'night' %}selected{% endif %}>Overnight Express</option>
+                                <option value="day" {% if selected_type == 'day' %}selected{% endif %}>Intercity (Day)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="/routes-page" class="btn btn-secondary w-100 rounded-1">Reset Query</a>
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
 
-        <!-- Routes Grid -->
         <div class="row g-4">
             {% for route in routes %}
             <div class="col-md-6 col-lg-4">
                 <div class="card route-card h-100">
                     <div class="card-body">
-                        <!-- Route Name -->
-                        <h5 class="card-title">
-                            <i class="bi bi-train-front text-primary"></i>
-                            {{ route[2] or "Unknown Route" }}
-                        </h5>
+                        <div class="route-header d-flex justify-content-between align-items-start">
+                            <div class="route-title">{{ route[2] or "Commercial Service" }}</div>
+                            {% if route[9] == 'night' %}
+                            <span class="badge bg-dark badge-type">Night</span>
+                            {% else %}
+                            <span class="badge bg-primary badge-type">Day</span>
+                            {% endif %}
+                        </div>
                         
-                        <!-- Origin and Destination -->
-                        <p class="card-text">
-                            <strong>{{ route[3] }}</strong>
-                            <span class="badge bg-primary">{{ route[5] }}</span>
-                            <br>
-                            <i class="bi bi-arrow-down"></i>
-                            <br>
-                            <strong>{{ route[4] }}</strong>
-                            <span class="badge bg-success">{{ route[6] }}</span>
-                        </p>
-
-                        <hr>
-
-                        <!-- Stats -->
-                        <div class="row g-2 text-center">
-                            <div class="col-6">
-                                <small class="text-muted d-block">Distance</small>
-                                <strong>{{ "{:,.0f}".format(route[7]) }} km</strong>
+                        <div class="route-path">
+                            <div class="mb-2">
+                                <span class="badge bg-light text-dark border me-2">{{ route[5] }}</span>
+                                <span class="fw-bold">{{ route[3] }}</span>
                             </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">Type</small>
-                                {% if route[9] == 'night' %}
-                                <span class="badge bg-dark">
-                                    <i class="bi bi-moon-stars-fill"></i> Night
-                                </span>
-                                {% else %}
-                                <span class="badge bg-warning text-dark">
-                                    <i class="bi bi-sun-fill"></i> Day
-                                </span>
-                                {% endif %}
+                            <div>
+                                <span class="badge bg-light text-dark border me-2">{{ route[6] }}</span>
+                                <span class="fw-bold">{{ route[4] }}</span>
                             </div>
                         </div>
 
-                        <hr>
-
-                        <!-- CO2 Savings -->
-                        <div class="text-center">
-                            <small class="text-muted d-block">CO₂ Savings vs Airplane</small>
-                            <h4 class="text-success mb-0">
-                                <i class="bi bi-cloud-check-fill"></i>
-                                {{ "{:,.1f}".format(route[14]) }} kg
-                            </h4>
-                            <small class="text-muted">
-                                ({{ "{:.1f}".format(route[15]) }}% reduction)
-                            </small>
+                        <div class="row g-2 mb-3">
+                            <div class="col-12">
+                                <div class="stat-box d-flex justify-content-between align-items-center">
+                                    <span class="small text-muted text-uppercase fw-bold">Distance</span>
+                                    <span class="fw-bold">{{ "{:,.0f}".format(route[7]) }} km</span>
+                                </div>
+                            </div>
                         </div>
 
+                        <div class="impact-section p-2 text-center rounded" style="background-color: #f0fff4; border: 1px solid #c6f6d5;">
+                            <div class="small text-uppercase fw-bold text-success mb-1">CO₂ Savings</div>
+                            <div class="impact-value">{{ "{:,.1f}".format(route[14]) }} kg</div>
+                            <div class="small fw-bold text-success opacity-75">{{ "{:.1f}".format(route[15]) }}% lower than flight</div>
+                        </div>
                     </div>
                 </div>
             </div>
             {% endfor %}
         </div>
 
-        {% if routes|length == 0 %}
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <i class="bi bi-info-circle fs-1"></i>
-                    <h4 class="mt-3">No routes found</h4>
-                    <p>Try adjusting your filters</p>
-                </div>
+        <div class="row mt-5">
+            <div class="col-12 border-top pt-4 text-center">
+                <p class="text-muted small">Data provided by ObRail Europe. Verified environmental metrics for {{ routes|length }} current routes.</p>
             </div>
         </div>
-        {% endif %}
-
-        <!-- Results Info -->
-        <div class="row mt-4">
-            <div class="col-12 text-center text-muted">
-                <p>Showing {{ routes|length }} routes (limited to 100 results)</p>
-            </div>
-        </div>
-
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-light py-4 mt-5">
-        <div class="container text-center text-muted">
-            <p class="mb-0">
-                <i class="bi bi-train-front"></i> ObRail Europe - MSPR Project 2026
-            </p>
-            <small>Environmental Impact Analysis of European Night Trains</small>
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <small class="opacity-75">ObRail Europe Technical Suite © 2026 | MSPR Project</small>
         </div>
     </footer>
 
-    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 </body>
 </html>

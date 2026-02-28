@@ -8,3 +8,9 @@ __pycache__/
 data/
 
 .env 
+
+.env.docker 
+
+.pytest_cache/
+
+.logs

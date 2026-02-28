@@ -1,0 +1,18 @@
+2026-02-28 13:56:01 [INFO] day_trains - Starting GTFS Day Routes Extraction with PySpark
+2026-02-28 13:57:01 [INFO] day_trains - Processing folder: data/raw/day/Denmark/
+2026-02-28 13:57:16 [WARNING] day_trains - Skipping data/raw/day/Denmark/ — no stop_times.txt and no start/end stop columns in trips.txt
+2026-02-28 13:57:16 [WARNING] day_trains - No routes extracted from data/raw/day/Denmark/
+2026-02-28 13:57:16 [INFO] day_trains - Processing folder: data/raw/day/Eurostar_international/
+2026-02-28 13:57:43 [INFO] day_trains - Extracted 10289 routes from data/raw/day/Eurostar_international/
+2026-02-28 13:57:43 [INFO] day_trains - Processing folder: data/raw/day/France/
+2026-02-28 13:58:01 [INFO] day_trains - Extracted 41264 routes from data/raw/day/France/
+2026-02-28 13:58:01 [INFO] day_trains - Processing folder: data/raw/day/Germany/
+2026-02-28 13:58:02 [WARNING] day_trains - Skipping data/raw/day/Germany/ — no stop_times.txt and no start/end stop columns in trips.txt
+2026-02-28 13:58:02 [WARNING] day_trains - No routes extracted from data/raw/day/Germany/
+2026-02-28 13:58:02 [INFO] day_trains - Processing folder: data/raw/day/Switzerland/
+2026-02-28 13:58:22 [INFO] day_trains - Extracted 110234 routes from data/raw/day/Switzerland/
+2026-02-28 13:58:33 [INFO] day_trains - Combined routes before deduplication: 161787
+2026-02-28 13:58:44 [INFO] day_trains - Final routes after deduplication: 3439
+2026-02-28 13:59:00 [INFO] day_trains - Day routes CSV saved: data/extracted/day_routes.csv (3439 routes)
+2026-02-28 13:59:24 [INFO] day_trains - Spark session finished
+2026-02-28 13:59:24 [INFO] py4j.clientserver - Closing down clientserver connection

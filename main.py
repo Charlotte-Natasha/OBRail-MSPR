@@ -2,15 +2,15 @@
 ObRail Europe ETL Pipeline - Main Orchestrator
 ===============================================
 
-This is the MAIN script that runs the entire ETL pipeline.
+Run the entire ETL pipeline with: python main.py
 
-Run this with: python main.py
-
-It will automatically:
-1. Extract night routes
-2. Extract day routes
-3. Transform and clean all data
-4. Generate summary report
+Phases:
+1. Extract night routes (night_trains.py)
+2. Extract day routes (day_trains.py)
+3. Extract CO2 reference data (emissions.py)
+4. Transform and clean routes (clean_routes.py)
+5. Calculate environmental impact (calculate_co2.py)
+6. Load into PostgreSQL (load_database.py)
 
 Author: ObRail Europe Data Team
 """
@@ -18,239 +18,145 @@ Author: ObRail Europe Data Team
 import os
 import sys
 import time
+import logging
 from datetime import datetime
 
-def print_header(title):
-    """Print a formatted header"""
-    print("\n" + "=" * 80)
-    print(f" {title}")
-    print("=" * 80 + "\n")
+# ============================================
+# LOGGING SETUP
+# ============================================
 
-def print_phase_separator():
-    """Print a phase separator"""
-    print("\n" + "-" * 80 + "\n")
+os.makedirs("logs", exist_ok=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s - %(message)s",
+    datefmt="%Y-%m-%d %H:%M:%S",
+    handlers=[
+        logging.FileHandler("logs/pipeline.log"),
+        logging.StreamHandler()  # also print to terminal
+    ]
+)
+logger = logging.getLogger("pipeline")
 
 
-# PHASE 1: EXTRACT
+# ============================================
+# HELPERS
+# ============================================
+
+def run_phase(phase_name, module_path, func_name="main"):
+    """Run a single ETL phase and return True/False"""
+    logger.info(f"Starting: {phase_name}")
+    start_time = time.time()
+
+    try:
+        parts = module_path.split(".")
+        module = __import__(module_path, fromlist=[parts[-1]])
+        getattr(module, func_name)()
+        elapsed = time.time() - start_time
+        logger.info(f"Done: {phase_name} ({elapsed:.2f}s)")
+        return True
+    except Exception as e:
+        logger.error(f"Failed: {phase_name} — {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
+# ============================================
+# PHASES
+# ============================================
 
 def run_extraction_phase():
-    print_header("PHASE 1: EXTRACT - Extracting Routes from GTFS Data")
-    start_time = time.time()
-
-    print("🌙 Extracting NIGHT routes...")
-    try:
-        from scripts import night_trains
-        night_trains.main()
-        print("✓ Night routes extraction completed")
-    except Exception as e:
-        print(f"✗ Error extracting night routes: {str(e)}")
+    logger.info("=== PHASE 1: EXTRACT ===")
+    if not run_phase("Night routes extraction", "scripts.night_trains"):
         return False
-
-    print_phase_separator()
-
-    print("☀️  Extracting DAY routes...")
-    try:
-        from scripts import day_trains   # FIXED NAME
-        day_trains.main()
-        print("✓ Day routes extraction completed")
-    except Exception as e:
-        print(f"✗ Error extracting day routes: {str(e)}")
+    if not run_phase("Day routes extraction", "scripts.day_trains"):
         return False
-
-    print(f"\n✅ EXTRACTION phase completed in {time.time() - start_time:.2f} seconds")
     return True
 
-# PHASE 3: EXTRACT CO2 REFERENCE DATA
 
 def extract_co2_reference_data():
-    """Extract CO2 emission factors from Back-on-Track data"""
-    print_header("PHASE 1.5: CO2 REFERENCE - Extracting Emission Factors")
-    
-    start_time = time.time()
-    
-    print("📊 Extracting CO2 emission factors...")
-    try:
-        from scripts import emissions
-        emissions.main()
-        print("✓ CO2 emission factors extracted")
-    except Exception as e:
-        print(f"✗ Error extracting CO2 data: {str(e)}")
-        return False
-    
-    print(f"\n✅ CO2 REFERENCE phase completed in {time.time() - start_time:.2f} seconds")
-    return True
+    logger.info("=== PHASE 2: CO2 REFERENCE ===")
+    return run_phase("CO2 reference extraction", "scripts.emissions")
 
-# PHASE 3: TRANSFORM
 
 def run_transformation_phase():
-    print_header("PHASE 2: TRANSFORM - Cleaning and Standardizing Data")
-    start_time = time.time()
+    logger.info("=== PHASE 3: TRANSFORM ===")
+    return run_phase("Routes cleaning and transformation", "scripts.clean_routes")
 
-    print("🔄 Transforming and cleaning data...")
-    try:
-        from scripts import clean_routes
-        clean_routes.main()
-        print("✓ Data transformation completed")
-    except Exception as e:
-        print(f"✗ Error during transformation: {str(e)}")
-        return False
-
-    print(f"\n✅ TRANSFORMATION phase completed in {time.time() - start_time:.2f} seconds")
-    return True
-
-# PHASE 4: ENVIRONMENTAL IMPACT ANALYSIS
 
 def calculate_environmental_impact():
-    """Calculate CO2 emissions for each route"""
-    print_header("PHASE 2.5: ENVIRONMENTAL IMPACT - Calculating CO2 per Route")
-    
-    start_time = time.time()
-    
-    print("🌍 Calculating environmental impact...")
-    try:
-        from scripts import calculate_co2
-        calculate_co2.main()
-        print("✓ Environmental impact calculated")
-    except Exception as e:
-        print(f"✗ Error calculating CO2: {str(e)}")
-        return False
-    
-    print(f"\n✅ ENVIRONMENTAL IMPACT phase completed in {time.time() - start_time:.2f} seconds")
-    return True
+    logger.info("=== PHASE 4: ENVIRONMENTAL IMPACT ===")
+    return run_phase("Environmental impact calculation", "scripts.calculate_co2")
 
-# PHASE 5: LOAD (Future)
 
 def run_loading_phase():
-    """Execute the loading phase - placeholder for future implementation"""
-    print_header("PHASE 3: LOAD - Loading Data into Database")
-    
-    print("📊 Loading phase:")
-    print("   Status: TO BE IMPLEMENTED")
-    print("   This phase will load cleaned data into PostgreSQL database")
-    print("")
-    
-    return True
+    logger.info("=== PHASE 5: LOAD ===")
+    return run_phase("Database loading", "scripts.load_database")
 
 
-# GENERATE SUMMARY REPORT
+# ============================================
+# SUMMARY REPORT
+# ============================================
 
 def generate_summary_report():
-    """Generate a summary report of the ETL process"""
-    print_header("ETL PIPELINE SUMMARY")
+    """Log file sizes and existence of all expected outputs"""
+    logger.info("=== PIPELINE SUMMARY ===")
 
-    extracted_dir = os.path.join("data", "extracted")
-    transformed_dir = os.path.join("data", "transformed")
-
-    print("📁 OUTPUT FILES:\n")
-
-    
-    # Extracted files
-    
-    extracted_files = [
-        "day_routes.csv",
-        "night_routes.csv"
+    expected_files = [
+        "data/extracted/day_routes.csv",
+        "data/extracted/night_routes.csv",
+        "data/transformed/day_routes_cleaned.csv",
+        "data/transformed/night_routes_cleaned.csv",
+        "data/transformed/all_routes_cleaned.csv",
+        "data/transformed/emissions_reference.csv",
+        "data/transformed/emissions_summary.csv",
+        "data/transformed/environmental_impact.csv",
     ]
 
-    print("📦 Extracted data:")
-    for filename in extracted_files:
-        path = os.path.join(extracted_dir, filename)
+    for path in expected_files:
         if os.path.exists(path):
-            size = os.path.getsize(path) / 1024
-            print(f"   ✓ {path} ({size:.1f} KB)")
+            size_kb = os.path.getsize(path) / 1024
+            logger.info(f"OK: {path} ({size_kb:.1f} KB)")
         else:
-            print(f"   ✗ {path} - NOT FOUND")
-
-    print()
-
-    
-    # Transformed files
-    
-    transformed_files = [
-        "day_routes_cleaned.csv",
-        "night_routes_cleaned.csv",
-        "all_routes_cleaned.csv",
-        "emissions_reference.csv",
-        "emissions_summary.csv",
-        "environmental_impact.csv"
-    ]
-
-    print("🔧 Transformed data:")
-    for filename in transformed_files:
-        path = os.path.join(transformed_dir, filename)
-        if os.path.exists(path):
-            size = os.path.getsize(path) / 1024
-            print(f"   ✓ {path} ({size:.1f} KB)")
-        else:
-            print(f"   ✗ {path} - NOT FOUND")
-
-    print("\n👉 Final output should be:")
-    print(f"   {os.path.join(transformed_dir, 'all_routes_cleaned.csv')}\n")
+            logger.warning(f"MISSING: {path}")
 
 
-# MAIN PIPELINE ORCHESTRATOR
+# ============================================
+# MAIN
+# ============================================
 
 def main():
-    """Main ETL pipeline orchestrator"""
-    
-    print("\n" + "=" * 80)
-    print("   ___  _    ___       _ _   _____ _____ _    ")
-    print("  / _ \\| |_ | _ \\ __ _(_) | | __  |_   _| |   ")
-    print(" | (_) | __ |   / / _` | | | | _|   | | | |__ ")
-    print("  \\___/|_|_||_|_\\ \\__,_|_|_| |___   |_| |____|")
-    print("")
-    print("         European Rail Routes ETL Pipeline")
-    print("=" * 80)
-    
     start_time = time.time()
-    
-    print(f"\n🚀 Starting ETL Pipeline at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    # Phase 1: Extract
-    if not run_extraction_phase():
-        print("\n❌ ETL Pipeline FAILED at EXTRACTION phase")
-        sys.exit(1)
-        
-    # Phase 1.5: Extract CO2 reference 
-    if not extract_co2_reference_data():
-        sys.exit(1)    
-    
-    # Phase 2: Transform
-    if not run_transformation_phase():
-        print("\n❌ ETL Pipeline FAILED at TRANSFORMATION phase")
-        sys.exit(1)
-        
-    # Phase 2.5: Calculate environmental impact ← ADD THIS
-    if not calculate_environmental_impact():
-        sys.exit(1)    
-    
-    # Phase 3: Load (placeholder)
-    if not run_loading_phase():
-        print("\n❌ ETL Pipeline FAILED at LOADING phase")
-        sys.exit(1)
-    
-    # Generate summary
+    logger.info(f"ObRail Europe ETL pipeline started — {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    phases = [
+        ("Extraction",             run_extraction_phase),
+        ("CO2 reference",          extract_co2_reference_data),
+        ("Transformation",         run_transformation_phase),
+        ("Environmental impact",   calculate_environmental_impact),
+        ("Database loading",       run_loading_phase),
+    ]
+
+    for phase_name, phase_fn in phases:
+        if not phase_fn():
+            logger.error(f"Pipeline FAILED at: {phase_name}")
+            sys.exit(1)
+
     generate_summary_report()
-    
-    # Final summary
+
     total_elapsed = time.time() - start_time
-    
-    print_header("ETL PIPELINE COMPLETE")
-    print(f"✅ All phases completed successfully!")
-    print(f"⏱️  Total execution time: {total_elapsed:.2f} seconds ({total_elapsed/60:.1f} minutes)")
-    print(f"📁 Outputs:")
-    print(f"   - Extracted data: data/extracted/")
-    print(f"   - Transformed data: data/transformed/")
-    print(f"   - Final output: data/transformed/all_routes_cleaned.csv")
-    print()
+    logger.info(f"Pipeline complete — {total_elapsed:.2f}s ({total_elapsed/60:.1f} min)")
+
 
 if __name__ == "__main__":
     try:
         main()
     except KeyboardInterrupt:
-        print("\n\n⚠️  Pipeline interrupted by user")
+        logger.warning("Pipeline interrupted by user")
         sys.exit(1)
     except Exception as e:
-        print(f"\n\n❌ Unexpected error: {str(e)}")
+        logger.error(f"Unexpected error: {str(e)}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

@@ -126,20 +126,30 @@ ORDER BY total_savings_kg DESC;
 
 -- Top routes by CO2 savings
 CREATE OR REPLACE VIEW v_top_routes_savings AS
-SELECT 
-    route_name_simple,
-    origin,
-    destination,
-    origin_country,
-    destination_country,
-    distance_km,
-    train_type,
-    co2_savings_kg,
-    savings_percent
-FROM fact_routes
+WITH deduped AS (
+  SELECT *,
+    CASE WHEN origin < destination THEN origin ELSE destination END as o_norm,
+    CASE WHEN origin < destination THEN destination ELSE origin END as d_norm,
+    ROUND(distance_km) as dist_norm
+    FROM fact_routes
 WHERE co2_savings_kg IS NOT NULL
+),
+ranked AS (
+    SELECT route_name_simple, origin, destination, origin_country, 
+            destination_country, distance_km, train_type, co2_savings_kg, savings_percent,
+            ROW_NUMBER() OVER(
+            PARTITION BY o_norm, d_norm, dist_norm 
+            ORDER BY co2_savings_kg DESC
+            ) as rn
+    FROM deduped
+)
+SELECT route_name_simple, origin, destination, origin_country, 
+        destination_country, distance_km, train_type, co2_savings_kg, savings_percent
+FROM ranked 
+WHERE rn = 1
 ORDER BY co2_savings_kg DESC
 LIMIT 50;
+
 
 -- Summary statistics
 CREATE OR REPLACE VIEW v_summary_stats AS
