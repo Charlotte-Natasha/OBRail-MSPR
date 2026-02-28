@@ -62,37 +62,40 @@ async def dashboard_home(request: Request, db: Session = Depends(get_db)):
     
     # Get summary statistics
     summary_query = text("""
-        SELECT 
-            COUNT(*) as total_routes,
-            COUNT(DISTINCT origin_country) as countries,
-            ROUND(SUM(co2_savings_kg)::numeric, 2) as total_savings_kg,
-            ROUND(AVG(co2_savings_kg)::numeric, 2) as avg_savings_kg,
-            ROUND(AVG(savings_percent)::numeric, 2) as avg_savings_pct
+    SELECT 
+        COUNT(*) as total_routes,
+        COUNT(*) FILTER (WHERE train_type = 'day') as day_routes,
+        COUNT(*) FILTER (WHERE train_type = 'night') as night_routes,
+        COUNT(DISTINCT origin_country) as countries,
+        ROUND(SUM(co2_savings_kg)::numeric, 2) as total_savings_kg,
+        COUNT(*) FILTER (WHERE distance_km <= 1600) as viable_alternatives
         FROM fact_routes
-    """)
-    
+        """)
+
     result = db.execute(summary_query).fetchone()
-    
+
     summary = {
         "total_routes": result[0],
-        "countries": result[1],
-        "total_co2_saved_kg": result[2],
-        "total_co2_saved_tons": round(result[2] / 1000, 2) if result[2] else 0,
-        "avg_savings_kg": result[3],
-        "avg_savings_pct": result[4]
+        "day_routes": result[1],
+        "night_routes": result[2],
+        "countries": result[3],
+        "total_co2_saved_kg": result[4],
+        "total_co2_saved_tons": round(result[4] / 1000, 2) if result[4] else 0,
+        "viable_alternatives": result[5]
     }
     
     # Get top 10 routes by savings
     top_routes_query = text("""
-        SELECT 
-            route_name_simple,
-            origin_country,
-            destination_country,
-            distance_km,
-            co2_savings_kg
-        FROM fact_routes
-        ORDER BY co2_savings_kg DESC
-        LIMIT 10
+    SELECT 
+        route_name_simple,
+        origin_country,
+        destination_country,
+        train_type,
+        co2_savings_kg,
+        ROUND((distance_km / 200.0)::numeric, 1) as estimated_hours
+    FROM v_top_routes_savings
+    ORDER BY co2_savings_kg DESC
+    LIMIT 10
     """)
     
     top_routes = db.execute(top_routes_query).fetchall()
@@ -113,7 +116,7 @@ async def dashboard_home(request: Request, db: Session = Depends(get_db)):
     countries = db.execute(countries_query).fetchall()
     
     return templates.TemplateResponse(
-        "dashboard.html",
+        "Dashboard.html",
         {
             "request": request,
             "summary": summary,
@@ -159,7 +162,7 @@ async def routes_page(
     """)).fetchall()
     
     return templates.TemplateResponse(
-        "routes.html",
+        "Routes.html",
         {
             "request": request,
             "routes": routes,
@@ -177,22 +180,28 @@ async def countries_page(request: Request, db: Session = Depends(get_db)):
     """
     
     query = text("""
-        SELECT 
-            origin_country,
-            COUNT(*) as route_count,
-            ROUND(AVG(distance_km)::numeric, 2) as avg_distance,
-            ROUND(SUM(co2_savings_kg)::numeric, 2) as total_savings,
-            ROUND(SUM(co2_savings_kg)::numeric / 1000, 2) as total_savings_tons
-        FROM fact_routes
-        WHERE origin_country IS NOT NULL
-        GROUP BY origin_country
-        ORDER BY total_savings DESC
+    SELECT 
+        origin_country,
+        COUNT(*) as route_count,
+        ROUND(AVG(distance_km)::numeric, 2) as avg_distance,
+        ROUND(SUM(co2_savings_kg)::numeric, 2) as total_savings,
+        ROUND(SUM(co2_savings_kg)::numeric / 1000, 2) as total_savings_tons,
+        COUNT(*) FILTER (WHERE train_type = 'day') as day_routes,
+        COUNT(*) FILTER (WHERE train_type = 'night') as night_routes,
+        ROUND(
+            COUNT(*) FILTER (WHERE distance_km > 1600)::numeric 
+            / NULLIF(COUNT(*), 0) * 100
+        ) as coverage_gap
+    FROM fact_routes
+    WHERE origin_country IS NOT NULL
+    GROUP BY origin_country
+    ORDER BY total_savings DESC
     """)
     
     countries = db.execute(query).fetchall()
     
     return templates.TemplateResponse(
-        "countries.html",
+        "Countries.html",
         {
             "request": request,
             "countries": countries

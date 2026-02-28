@@ -9,7 +9,7 @@ FastAPI application providing REST API endpoints and web dashboard for European 
 - **GET /api/routes/{id}** - Get specific route by ID
 - **GET /api/countries** - Get all countries with statistics
 - **GET /api/countries/{code}** - Get routes for specific country
-- **GET /api/emissions/summary** - Get overall CO₂ statistics
+- **GET /api/emissions/summary** - Get overall CO₂ s
 - **GET /api/emissions/top-routes** - Get routes with highest savings
 
 ### Web Dashboard (HTML)

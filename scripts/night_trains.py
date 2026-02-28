@@ -9,8 +9,6 @@ from math import radians, cos, sin, asin, sqrt
 import unicodedata
 import re
 import os
-import glob
-import shutil
 
 
 # CONFIGURATION
@@ -243,7 +241,6 @@ def extract_routes_pyspark(spark, folder, folder_country):
             .otherwise(concat(col("destination"), lit("_"), col("origin")))
         )
         
-        df = df.dropDuplicates(["station_pair"])
         
         # Resolve country for origin and destination
         df = df.withColumn("origin_country", resolve_country_udf(col("origin"), lit(folder_country)))
@@ -283,13 +280,46 @@ def main():
     
     if all_routes:
         from functools import reduce
-        master_night = reduce(lambda df1, df2: df1.union(df2), all_routes)
-        master_night = master_night.dropDuplicates(["origin", "destination", "route_name"])
+        from pyspark.sql.functions import when, concat, lit, round as spark_round, row_number
+        from pyspark.sql.window import Window
+        import glob
+        import shutil
         
+        # Union all folder DataFrames
+        master_night = reduce(lambda df1, df2: df1.union(df2), all_routes)
+        print(f"   Combined routes before deduplication: {master_night.count()}")
+        
+        # Ensure station_pair exists and normalize distance
+        master_night = master_night.withColumn(
+            "station_pair",
+            when(col("origin") < col("destination"),
+                concat(col("origin"), lit("_"), col("destination")))
+            .otherwise(concat(col("destination"), lit("_"), col("origin")))
+        )
+        
+        master_night = master_night.withColumn(
+            "distance_norm", 
+            spark_round(col("distance_km"), 0)
+        )
+        
+        # Deduplicate: keep 1 row per station_pair + distance_norm
+        # Order by route_name alphabetically as tie-breaker
+        w = Window.partitionBy("station_pair", "distance_norm").orderBy("route_name")
+        master_night = (master_night
+            .withColumn("rn", row_number().over(w))
+            .filter(col("rn") == 1)
+            .drop("rn", "station_pair", "distance_norm")
+        )
+        
+        final_count = master_night.count()
+        print(f"   Final routes after deduplication: {final_count}")
+        
+        # Create output directory
         output_dir = os.path.dirname(OUTPUT_FILE)
         if output_dir and not os.path.exists(output_dir):
             os.makedirs(output_dir)
         
+        # Write to CSV (single file)
         temp_path = OUTPUT_FILE.replace('.csv', '_temp')
         master_night.coalesce(1).write.csv(temp_path, header=True, mode='overwrite')
         
@@ -299,8 +329,14 @@ def main():
             shutil.rmtree(temp_path)
         
         print(f"\n✅ Master night routes CSV created: {OUTPUT_FILE}")
+        print(f"   Total unique routes: {final_count}")
+        
+        # Summary stats
+        print(f"\nCountry breakdown (origin):")
         master_night.groupBy("origin_country").count().orderBy(col("count").desc()).show()
-        master_night.show(10, truncate=False)
+        
+        print(f"\nSample routes:")
+        master_night.select("route_name", "origin", "destination", "origin_country", "destination_country", "distance_km").show(10, truncate=False)
     
     else:
         print("\n❌ No night routes were extracted from any folder")
@@ -308,5 +344,7 @@ def main():
     spark.stop()
     print("\n✅ Spark session finished")
 
+
 if __name__ == "__main__":
     main()
+

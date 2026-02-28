@@ -4,190 +4,209 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Countries - ObRail Europe</title>
-    
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
     <style>
-        body {
-            background-color: #f8f9fa;
+        :root {
+            --rail-primary: #0d6efd;
+            --bg-neutral: #f8f9fa;
         }
-        .country-card {
-            transition: transform 0.2s;
+        body { background-color: var(--bg-neutral); font-family: 'Inter', system-ui, sans-serif; color: #1e293b; }
+        .navbar { background-color: var(--rail-primary) !important; border-bottom: 3px solid #0a58ca; }
+
+        .data-card { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 28px; }
+
+        .table thead th {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            background: #f8f9fa;
+            padding: 12px 16px;
+            color: #64748b;
+            border: none;
+            font-weight: 700;
         }
-        .country-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+        .table tbody td { padding: 14px 16px; vertical-align: middle; border-color: #f1f5f9; }
+
+        /* Day/night split mini bar */
+        .split-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; width: 80px; gap: 2px; }
+        .split-day   { background: #3b82f6; border-radius: 99px 0 0 99px; }
+        .split-night { background: #1e293b; border-radius: 0 99px 99px 0; }
+
+        /* Coverage gap indicator */
+        .gap-high   { color: #b91c1c; font-weight: 700; }
+        .gap-medium { color: #d97706; font-weight: 700; }
+        .gap-low    { color: #15803d; font-weight: 700; }
+
+        /* Spotlight cards */
+        .spotlight-card { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 20px; }
+        .spotlight-card .country-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
+
+        .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
+        .stat-row:last-child { border-bottom: none; }
+
+        .badge-night { background: #1e293b; color: #fff; font-size: 0.68rem; font-weight: 700; border-radius: 5px; padding: 2px 7px; }
+        .badge-day   { background: #eff6ff; color: #2563eb; font-size: 0.68rem; font-weight: 700; border-radius: 5px; padding: 2px 7px; }
+
+        .source-note { font-size: 0.72rem; color: #94a3b8; }
     </style>
 </head>
 <body>
-    
-    <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-train-front-fill"></i> ObRail Europe
+
+<nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/"><i class="bi bi-train-front-fill me-2"></i>OBRAIL EUROPE</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link text-white" href="/">Dashboard</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/routes-page">Routes</a></li>
+                <li class="nav-item"><a class="nav-link text-white active fw-bold" href="/countries-page">Countries</a></li>
+                <li class="nav-item ms-lg-3">
+                    <a class="btn btn-outline-light btn-sm rounded-pill px-3" href="/api/docs" target="_blank">
+                        <i class="bi bi-code-square me-1"></i> API
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+
+    <div class="row mb-4 align-items-end border-bottom pb-4">
+        <div class="col-lg-8">
+            <h1 class="fw-bold">Territorial Analysis</h1>
+            <p class="text-muted">Rail coverage, CO&#x2082; reduction, and day vs night train breakdown by country. Coverage gap shows the share of flight routes with no viable train alternative under 8h.</p>
+        </div>
+        <div class="col-lg-4 text-lg-end">
+            <a href="/api/countries/export?format=csv" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-download me-1"></i> Export (CSV)
             </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">Dashboard</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/routes-page">Routes</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/countries-page">Countries</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/api/docs" target="_blank">
-                            <i class="bi bi-code-square"></i> API
-                        </a>
-                    </li>
-                </ul>
-            </div>
         </div>
-    </nav>
-
-    <!-- Main Content -->
-    <div class="container mt-4">
-        
-        <!-- Page Header -->
-        <div class="row mb-4">
-            <div class="col">
-                <h1 class="display-4">
-                    <i class="bi bi-globe-europe-africa text-primary"></i> Countries
-                </h1>
-                <p class="lead text-muted">Environmental impact by country</p>
-            </div>
-        </div>
-
-        <!-- Countries Table -->
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">
-                            <i class="bi bi-table"></i> Country Statistics
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Rank</th>
-                                        <th>Country</th>
-                                        <th class="text-center">Routes</th>
-                                        <th class="text-end">Avg Distance</th>
-                                        <th class="text-end">Total CO₂ Saved</th>
-                                        <th class="text-end">Tons</th>
-                                        <th class="text-center">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for country in countries %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ loop.index }}</strong>
-                                        </td>
-                                        <td>
-                                            <h5 class="mb-0">
-                                                <span class="badge bg-primary fs-6">{{ country[0] }}</span>
-                                            </h5>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-info text-dark">
-                                                {{ country[1] }} routes
-                                            </span>
-                                        </td>
-                                        <td class="text-end">
-                                            {{ "{:,.0f}".format(country[2]) }} km
-                                        </td>
-                                        <td class="text-end">
-                                            <strong>{{ "{:,.1f}".format(country[3]) }} kg</strong>
-                                        </td>
-                                        <td class="text-end">
-                                            <strong class="text-success">
-                                                {{ "{:,.2f}".format(country[4]) }} t
-                                            </strong>
-                                        </td>
-                                        <td class="text-center">
-                                            <a href="/routes-page?country={{ country[0] }}" 
-                                               class="btn btn-sm btn-outline-primary">
-                                                <i class="bi bi-eye-fill"></i> View Routes
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Summary Cards -->
-        <div class="row g-4 mt-4">
-            
-            {% for country in countries[:6] %}
-            <div class="col-md-6 col-lg-4">
-                <div class="card country-card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title">
-                            <span class="badge bg-primary">{{ country[0] }}</span>
-                        </h3>
-                        
-                        <div class="mt-3">
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Routes:</span>
-                                <strong>{{ country[1] }}</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">Avg Distance:</span>
-                                <strong>{{ "{:,.0f}".format(country[2]) }} km</strong>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span class="text-muted">CO₂ Saved:</span>
-                                <strong class="text-success">{{ "{:,.2f}".format(country[4]) }} tons</strong>
-                            </div>
-                        </div>
-
-                        <div class="mt-3">
-                            <a href="/routes-page?country={{ country[0] }}" 
-                               class="btn btn-primary btn-sm w-100">
-                                <i class="bi bi-train-front"></i> View Routes
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-
-        </div>
-
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-light py-4 mt-5">
-        <div class="container text-center text-muted">
-            <p class="mb-0">
-                <i class="bi bi-train-front"></i> ObRail Europe - MSPR Project 2026
-            </p>
-            <small>Environmental Impact Analysis of European Night Trains</small>
+    <!-- MAIN TABLE -->
+    <div class="data-card mb-5">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th>Country</th>
+                        <th class="text-center">Total Routes</th>
+                        <th class="text-center">Day / Night split</th>
+                        <th class="text-end">Avg Distance</th>
+                        <th class="text-center">Coverage Gap</th>
+                        <th class="text-end">CO&#x2082; Reduction (T)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for country in countries %}
+                    <tr>
+                        <td class="fw-bold text-muted">{{ loop.index }}</td>
+                        <td class="fw-bold" style="font-size:1rem;">{{ country[0] }}</td>
+                        <td class="text-center">
+                            <span class="badge bg-secondary rounded-pill px-3">{{ country[1] }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="d-flex align-items-center justify-content-center gap-2">
+                                <!-- Split bar: day_routes / total as width % -->
+                                {% set day_pct = (country[5] / country[1] * 100) | int if country[1] > 0 else 0 %}
+                                {% set night_pct = 100 - day_pct %}
+                                <div class="split-bar">
+                                    <div class="split-day" style="width:{{ day_pct }}%;"></div>
+                                    <div class="split-night" style="width:{{ night_pct }}%;"></div>
+                                </div>
+                                <div style="font-size:0.72rem; white-space:nowrap;">
+                                    <span class="badge-day">{{ country[5] }}d</span>
+                                    <span class="badge-night ms-1">{{ country[6] }}n</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-end text-muted">{{ "{:,.0f}".format(country[2]) }} km</td>
+                        <td class="text-center">
+                            <!-- Coverage gap: % of flight routes with no viable train alternative -->
+                            {% if country[7] is defined %}
+                                {% if country[7] >= 60 %}
+                                <span class="gap-high">{{ country[7] }}% <i class="bi bi-exclamation-triangle-fill"></i></span>
+                                {% elif country[7] >= 30 %}
+                                <span class="gap-medium">{{ country[7] }}%</span>
+                                {% else %}
+                                <span class="gap-low">{{ country[7] }}% <i class="bi bi-check-circle-fill"></i></span>
+                                {% endif %}
+                            {% else %}
+                            <span class="text-muted small">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end fw-bold text-success" style="font-size:1rem;">{{ "{:,.2f}".format(country[4]) }} t</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-    </footer>
+        <p class="source-note mt-3">
+            <i class="bi bi-info-circle me-1"></i>
+            Coverage gap = share of domestic/intra-EU flight routes for which no train alternative under 8h exists.
+            A high gap signals a policy opportunity for rail expansion.
+        </p>
+    </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- TOP 3 SPOTLIGHTS -->
+    <h5 class="fw-bold text-uppercase small text-muted mb-3">Top 3 Contributors</h5>
+    <div class="row g-4 mb-5">
+        {% for country in countries[:3] %}
+        <div class="col-md-4">
+            <div class="spotlight-card h-100">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div class="country-name">{{ country[0] }}</div>
+                    <span class="badge bg-warning text-dark rounded-pill px-3" style="font-size:0.7rem;">#{{ loop.index }}</span>
+                </div>
 
+                <div class="stat-row">
+                    <span class="text-muted">Total routes</span>
+                    <span class="fw-bold">{{ country[1] }}</span>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted">Day train routes</span>
+                    <span><span class="badge-day">{{ country[5] }}</span></span>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted">Night train routes</span>
+                    <span><span class="badge-night">{{ country[6] }}</span></span>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted">Avg distance</span>
+                    <span class="fw-bold">{{ "{:,.0f}".format(country[2]) }} km</span>
+                </div>
+                <div class="stat-row">
+                    <span class="text-muted">CO&#x2082; reduction</span>
+                    <span class="fw-bold text-success">{{ "{:,.1f}".format(country[4]) }} t</span>
+                </div>
+                {% if country[7] is defined %}
+                <div class="stat-row">
+                    <span class="text-muted">Coverage gap</span>
+                    {% if country[7] >= 60 %}
+                    <span class="gap-high">{{ country[7] }}%</span>
+                    {% elif country[7] >= 30 %}
+                    <span class="gap-medium">{{ country[7] }}%</span>
+                    {% else %}
+                    <span class="gap-low">{{ country[7] }}%</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+
+<footer class="bg-dark text-white py-4 mt-5">
+    <div class="container text-center">
+        <small class="opacity-50">ObRail Europe Technical Suite &copy; 2026 | MSPR Project</small>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -21,3 +21,9 @@ jinja2==3.1.2
 
 # Python multipart - For file uploads (if needed later)
 python-multipart==0.0.6
+
+# Testing dependencies
+pytest
+
+# HTTP client for testing FastAPI endpoints
+httpx

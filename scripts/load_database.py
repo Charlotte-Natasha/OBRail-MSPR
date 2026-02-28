@@ -133,7 +133,7 @@ def verify_schema(engine):
             SELECT table_name 
             FROM information_schema.tables 
             WHERE table_schema = 'public' 
-              AND table_type = 'BASE TABLE'
+                AND table_type = 'BASE TABLE'
             ORDER BY table_name
         """))
         
@@ -381,46 +381,45 @@ def insert_dimensions(engine, df):
 # ============================================
 
 def insert_facts(engine, df):
-    """
-    Insert route data into fact_routes table.
-    
-    This is the main data - each row is one route with its
-    environmental impact calculations.
-    
-    Uses pandas .to_sql() which:
-    - Handles bulk insert automatically
-    - Converts data types correctly
-    - Much simpler than manual row building
-    
-    Args:
-        engine: SQLAlchemy engine
-        df: Cleaned DataFrame ready for insertion
-    """
-    
     print("\n💾 Loading data into fact_routes table...")
-    
+
     with engine.connect() as conn:
-        
-        # Clear existing data (for development/testing)
-        # In production, you might want to append instead
         print("   Clearing existing routes...")
         conn.execute(text("DELETE FROM fact_routes"))
         conn.commit()
-        
-        print(f"   Inserting {len(df)} routes...")
-        
-        # Use pandas to_sql for easy bulk insert
-        # This is MUCH simpler than building SQL manually!
-        df.to_sql(
-            'fact_routes',           # Table name
-            engine,                  # Database connection
-            if_exists='append',      # Append to existing table
-            index=False,             # Don't insert DataFrame index
-            method='multi',          # Use multi-row INSERT for speed
-            chunksize=1000           # Insert 1000 rows at a time
-        )
-        
+
+    print(f"   Inserting {len(df)} routes...")
+
+    # Use psycopg2 directly to avoid pandas version compatibility issues
+    from sqlalchemy import inspect
+    raw_conn = engine.raw_connection()
+    try:
+        cursor = raw_conn.cursor()
+
+        columns = ', '.join(df.columns)
+        placeholders = ', '.join(['%s'] * len(df.columns))
+        insert_sql = f"INSERT INTO fact_routes ({columns}) VALUES ({placeholders})"
+
+        # Convert DataFrame to list of tuples, replacing NaN with None
+        rows = [
+            tuple(None if pd.isna(v) else v for v in row)
+            for row in df.itertuples(index=False, name=None)
+        ]
+
+        # Insert in chunks of 1000
+        chunk_size = 1000
+        for i in range(0, len(rows), chunk_size):
+            cursor.executemany(insert_sql, rows[i:i + chunk_size])
+
+        raw_conn.commit()
+        cursor.close()
         print(f"   ✓ Successfully inserted {len(df)} routes!")
+
+    except Exception as e:
+        raw_conn.rollback()
+        raise e
+    finally:
+        raw_conn.close()        
 
 # ============================================
 # FUNCTION: Validate Loaded Data

@@ -3,9 +3,9 @@ services:
     image: postgres:15
     container_name: obrail_postgres_db
     env_file:
-      - .env
+      - .env.docker
     ports:
-      - "5433:5432"                    # ← MUST be 5433!
+      - "5433:5432"
     volumes:
       - ./database/init:/docker-entrypoint-initdb.d
       - postgres_data:/var/lib/postgresql/data
@@ -16,6 +16,21 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  obrail_api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: obrail_api
+    env_file:
+      - .env.docker
+    depends_on:
+      obrail_db:
+        condition: service_healthy
+    ports:
+      - "8001:8000"
+    networks:
+      - obrail_network
 
 networks:
   obrail_network:

@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import (
     col, trim, udf, lit, 
     concat,  when, row_number)
+from pyspark.sql.functions import round as spark_round
 from pyspark.sql.types import StringType, DoubleType  
 from pyspark.sql.window import Window
 from math import radians, sin, cos, asin, sqrt
@@ -335,8 +336,6 @@ def extract_routes_pyspark(spark, folder, folder_country):
             .otherwise(concat(col("destination"), lit("_"), col("origin")))
         )
         
-        df = df.dropDuplicates(["station_pair"])
-        
         # Resolve countries
         df = df.withColumn(
             "origin_country",
@@ -391,7 +390,6 @@ def extract_routes_pyspark(spark, folder, folder_country):
 
 def main():
     """Main execution function"""
-    
     print("🚀 Starting GTFS Day Routes Extraction with PySpark")
     
     # Initialize Spark
@@ -413,12 +411,33 @@ def main():
             print("   No routes extracted")
     
     if all_routes:
-        # Union all dataframes
         from functools import reduce
-        master_day = reduce(lambda df1, df2: df1.union(df2), all_routes)
+        from pyspark.sql.functions import when, concat, lit, row_number  # ← ADD THESE
+        from pyspark.sql.window import Window  # ← ADD THIS
         
-        # Remove duplicates across all sources
-        master_day = master_day.dropDuplicates(["origin", "destination", "route_name"])
+        # Union all dataframes
+        master_day = reduce(lambda df1, df2: df1.union(df2), all_routes)
+        print(f"   Combined routes before deduplication: {master_day.count()}")
+        
+        # Remove duplicates across all sources - STRONGER VERSION
+        master_day = master_day.withColumn(
+            "station_pair",
+            when(col("origin") < col("destination"),
+                 concat(col("origin"), lit("_"), col("destination")))
+            .otherwise(concat(col("destination"), lit("_"), col("origin")))
+        )
+        
+        master_day = master_day.withColumn("distance_norm", spark_round(col("distance_km"), 0))
+        
+        w = Window.partitionBy("station_pair", "distance_norm").orderBy("route_name")
+        master_day = (master_day
+            .withColumn("rn", row_number().over(w))
+            .filter(col("rn") == 1)
+            .drop("rn", "station_pair", "distance_norm")
+        )
+        
+        final_count = master_day.count()
+        print(f"   Final routes after deduplication: {final_count}")
         
         # Create output directory if it doesn't exist
         output_dir = os.path.dirname(OUTPUT_FILE)
@@ -426,34 +445,26 @@ def main():
             os.makedirs(output_dir)
         
         # Write to CSV (coalesce to single file)
-        master_day.coalesce(1).write.csv(
-            OUTPUT_FILE.replace('.csv', '_temp'),
-            header=True,
-            mode='overwrite'
-        )
+        temp_path = OUTPUT_FILE.replace('.csv', '_temp')
+        master_day.coalesce(1).write.csv(temp_path, header=True, mode='overwrite')
         
-        # Rename the part file to the expected output name
-        import glob
-        temp_files = glob.glob(OUTPUT_FILE.replace('.csv', '_temp') + '/part-*.csv')
+        import glob, shutil
+        temp_files = glob.glob(temp_path + '/part-*.csv')
         if temp_files:
-            import shutil
             shutil.move(temp_files[0], OUTPUT_FILE)
-            shutil.rmtree(OUTPUT_FILE.replace('.csv', '_temp'))
+            shutil.rmtree(temp_path)
         
-        total_routes = master_day.count()
         print(f"\n✅ Master day routes CSV created: {OUTPUT_FILE}")
-        print(f"Total routes: {total_routes}")
+        print(f"Total unique routes: {final_count}")
         
         print(f"\nCountry breakdown (origin):")
         master_day.groupBy("origin_country").count().orderBy(col("count").desc()).show()
         
         print(f"\nSample routes:")
         master_day.show(10, truncate=False)
-        
     else:
         print("\n❌ No day routes were extracted from any folder")
     
-    # Stop Spark session
     spark.stop()
     print("\n✅ Spark session finished")
 
