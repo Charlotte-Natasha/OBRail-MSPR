@@ -13,9 +13,7 @@
         }
         body { background-color: var(--bg-neutral); font-family: 'Inter', system-ui, sans-serif; color: #1e293b; }
         .navbar { background-color: var(--rail-primary) !important; border-bottom: 3px solid #0a58ca; }
-
         .data-card { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 28px; }
-
         .table thead th {
             font-size: 0.7rem;
             text-transform: uppercase;
@@ -27,28 +25,21 @@
             font-weight: 700;
         }
         .table tbody td { padding: 14px 16px; vertical-align: middle; border-color: #f1f5f9; }
-
-        /* Day/night split mini bar */
         .split-bar { display: flex; height: 8px; border-radius: 99px; overflow: hidden; width: 80px; gap: 2px; }
         .split-day   { background: #3b82f6; border-radius: 99px 0 0 99px; }
         .split-night { background: #1e293b; border-radius: 0 99px 99px 0; }
-
-        /* Coverage gap indicator */
         .gap-high   { color: #b91c1c; font-weight: 700; }
         .gap-medium { color: #d97706; font-weight: 700; }
         .gap-low    { color: #15803d; font-weight: 700; }
-
-        /* Spotlight cards */
         .spotlight-card { border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; padding: 20px; }
         .spotlight-card .country-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 12px; }
-
         .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #f1f5f9; font-size: 0.88rem; }
         .stat-row:last-child { border-bottom: none; }
-
         .badge-night { background: #1e293b; color: #fff; font-size: 0.68rem; font-weight: 700; border-radius: 5px; padding: 2px 7px; }
         .badge-day   { background: #eff6ff; color: #2563eb; font-size: 0.68rem; font-weight: 700; border-radius: 5px; padding: 2px 7px; }
-
         .source-note { font-size: 0.72rem; color: #94a3b8; }
+        .quality-card { border: 1px solid #e2e8f0; border-radius: 12px; background: #fff; padding: 24px; }
+        .quality-check { border-radius: 10px; padding: 14px 16px; }
     </style>
 </head>
 <body>
@@ -76,13 +67,91 @@
     <div class="row mb-4 align-items-end border-bottom pb-4">
         <div class="col-lg-8">
             <h1 class="fw-bold">Territorial Analysis</h1>
-            <p class="text-muted">Rail coverage, CO&#x2082; reduction, and day vs night train breakdown by country. Coverage gap shows the share of flight routes with no viable train alternative under 8h.</p>
+            <p class="text-muted">Rail coverage, CO&#x2082; reduction, and day vs night train breakdown by country. Coverage gap shows the share of routes with no viable train alternative under 8h.</p>
         </div>
         <div class="col-lg-4 text-lg-end">
-            <a href="/api/countries/export?format=csv" class="btn btn-outline-secondary rounded-pill px-4">
-                <i class="bi bi-download me-1"></i> Export (CSV)
+            <a href="/api/routes/export" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-download me-1"></i> Export Routes (CSV)
             </a>
         </div>
+    </div>
+
+    <!-- DATA QUALITY MONITOR -->
+    <div class="quality-card mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h6 class="fw-bold text-uppercase text-muted mb-0">
+                <i class="bi bi-shield-check me-2"></i>Data Quality Monitor
+            </h6>
+            {% if data_quality.total_issues == 0 %}
+            <span class="badge bg-success rounded-pill px-3">&#x2713; All checks passed</span>
+            {% else %}
+            <span class="badge bg-danger rounded-pill px-3">&#x26A0; {{ data_quality.total_issues }} issues found</span>
+            {% endif %}
+        </div>
+
+        <div class="row g-3 mb-3">
+            <div class="col-md-3 col-6">
+                <div class="quality-check {{ 'bg-success bg-opacity-10' if data_quality.null_origins == 0 else 'bg-danger bg-opacity-10' }}">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">NULL Origins</div>
+                    <div class="fw-bold fs-5 {{ 'text-success' if data_quality.null_origins == 0 else 'text-danger' }}">
+                        {{ data_quality.null_origins }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="quality-check {{ 'bg-success bg-opacity-10' if data_quality.null_destinations == 0 else 'bg-danger bg-opacity-10' }}">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">NULL Destinations</div>
+                    <div class="fw-bold fs-5 {{ 'text-success' if data_quality.null_destinations == 0 else 'text-danger' }}">
+                        {{ data_quality.null_destinations }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="quality-check {{ 'bg-success bg-opacity-10' if data_quality.null_co2 == 0 else 'bg-danger bg-opacity-10' }}">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">NULL CO&#x2082; Values</div>
+                    <div class="fw-bold fs-5 {{ 'text-success' if data_quality.null_co2 == 0 else 'text-danger' }}">
+                        {{ data_quality.null_co2 }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="quality-check {{ 'bg-success bg-opacity-10' if data_quality.null_countries == 0 else 'bg-danger bg-opacity-10' }}">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">NULL Countries</div>
+                    <div class="fw-bold fs-5 {{ 'text-success' if data_quality.null_countries == 0 else 'text-danger' }}">
+                        {{ data_quality.null_countries }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="quality-check {{ 'bg-success bg-opacity-10' if data_quality.negative_savings == 0 else 'bg-danger bg-opacity-10' }}">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">Negative Savings</div>
+                    <div class="fw-bold fs-5 {{ 'text-success' if data_quality.negative_savings == 0 else 'text-danger' }}">
+                        {{ data_quality.negative_savings }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="quality-check {{ 'bg-success bg-opacity-10' if data_quality.invalid_distances == 0 else 'bg-danger bg-opacity-10' }}">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">Invalid Distances</div>
+                    <div class="fw-bold fs-5 {{ 'text-success' if data_quality.invalid_distances == 0 else 'text-danger' }}">
+                        {{ data_quality.invalid_distances }}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="quality-check bg-light">
+                    <div class="small text-muted fw-bold text-uppercase mb-1">Last Data Load</div>
+                    <div class="fw-bold fs-5 text-secondary">
+                        {{ data_quality.last_load_date or '—' }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="source-note mb-0">
+            <i class="bi bi-info-circle me-1"></i>
+            Checks run live against the database on every page load. Green = no issues, Red = data anomaly detected.
+        </p>
     </div>
 
     <!-- MAIN TABLE -->
@@ -94,7 +163,7 @@
                         <th style="width:40px;">#</th>
                         <th>Country</th>
                         <th class="text-center">Total Routes</th>
-                        <th class="text-center">Day / Night split</th>
+                        <th class="text-center">Day / Night Split</th>
                         <th class="text-end">Avg Distance</th>
                         <th class="text-center">Coverage Gap</th>
                         <th class="text-end">CO&#x2082; Reduction (T)</th>
@@ -110,7 +179,6 @@
                         </td>
                         <td class="text-center">
                             <div class="d-flex align-items-center justify-content-center gap-2">
-                                <!-- Split bar: day_routes / total as width % -->
                                 {% set day_pct = (country[5] / country[1] * 100) | int if country[1] > 0 else 0 %}
                                 {% set night_pct = 100 - day_pct %}
                                 <div class="split-bar">
@@ -125,8 +193,7 @@
                         </td>
                         <td class="text-end text-muted">{{ "{:,.0f}".format(country[2]) }} km</td>
                         <td class="text-center">
-                            <!-- Coverage gap: % of flight routes with no viable train alternative -->
-                            {% if country[7] is defined %}
+                            {% if country[7] is not none %}
                                 {% if country[7] >= 60 %}
                                 <span class="gap-high">{{ country[7] }}% <i class="bi bi-exclamation-triangle-fill"></i></span>
                                 {% elif country[7] >= 30 %}
@@ -146,7 +213,7 @@
         </div>
         <p class="source-note mt-3">
             <i class="bi bi-info-circle me-1"></i>
-            Coverage gap = share of domestic/intra-EU flight routes for which no train alternative under 8h exists.
+            Coverage gap = share of routes for which no train alternative under 8h exists (distance &gt; 1600km).
             A high gap signals a policy opportunity for rail expansion.
         </p>
     </div>
@@ -161,7 +228,6 @@
                     <div class="country-name">{{ country[0] }}</div>
                     <span class="badge bg-warning text-dark rounded-pill px-3" style="font-size:0.7rem;">#{{ loop.index }}</span>
                 </div>
-
                 <div class="stat-row">
                     <span class="text-muted">Total routes</span>
                     <span class="fw-bold">{{ country[1] }}</span>
@@ -182,7 +248,7 @@
                     <span class="text-muted">CO&#x2082; reduction</span>
                     <span class="fw-bold text-success">{{ "{:,.1f}".format(country[4]) }} t</span>
                 </div>
-                {% if country[7] is defined %}
+                {% if country[7] is not none %}
                 <div class="stat-row">
                     <span class="text-muted">Coverage gap</span>
                     {% if country[7] >= 60 %}

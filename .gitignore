@@ -10,3 +10,5 @@ data/
 .env 
 
 .env.docker 
+
+.pytest_cache/
