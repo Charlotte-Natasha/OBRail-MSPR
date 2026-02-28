@@ -1,0 +1,14 @@
+2026-02-28 14:16:21 [INFO] clean_routes - Starting transformation phase — cleaning and standardizing routes
+2026-02-28 14:17:14 [INFO] clean_routes - Processing night routes
+2026-02-28 14:17:34 [INFO] clean_routes - Night routes after filtering nulls: 2717
+2026-02-28 14:17:44 [INFO] clean_routes - Saved: data/transformed/night_routes_cleaned.csv
+2026-02-28 14:17:44 [INFO] clean_routes - Processing day routes
+2026-02-28 14:17:45 [INFO] clean_routes - Day routes after filtering nulls: 3439
+2026-02-28 14:17:49 [INFO] clean_routes - Saved: data/transformed/day_routes_cleaned.csv
+2026-02-28 14:17:49 [INFO] clean_routes - Creating combined dataset
+2026-02-28 14:17:50 [INFO] clean_routes - Combined routes before deduplication: 6156
+2026-02-28 14:17:55 [INFO] clean_routes - After deduplication: 4067 routes (2089 duplicates removed)
+2026-02-28 14:18:01 [INFO] clean_routes - Saved: data/transformed/all_routes_cleaned.csv
+2026-02-28 14:18:01 [INFO] clean_routes - Route type breakdown:
+2026-02-28 14:19:37 [INFO] clean_routes - Transformation phase complete
+2026-02-28 14:19:37 [INFO] py4j.clientserver - Closing down clientserver connection
