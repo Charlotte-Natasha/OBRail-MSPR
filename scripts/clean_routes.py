@@ -185,7 +185,7 @@ def main():
     combined_df = combined_df.withColumn(
         "route_key",
         when(col("o_norm") < col("d_norm"),
-             concat(col("o_norm"), lit("_"), col("d_norm")))
+            concat(col("o_norm"), lit("_"), col("d_norm")))
         .otherwise(concat(col("d_norm"), lit("_"), col("o_norm")))
     )
 

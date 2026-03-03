@@ -205,19 +205,19 @@ def extract_routes_pyspark(spark, folder, folder_country):
             first_stops = stop_times.withColumn("rank", row_number().over(window_asc)) \
                 .filter(col("rank") == 1).select("trip_id", "stop_id") \
                 .join(stops.select("stop_id",
-                                   col("stop_name").alias("origin_name"),
-                                   col("stop_lat").alias("origin_lat"),
-                                   col("stop_lon").alias("origin_lon")),
-                      on="stop_id", how="left")
+                                col("stop_name").alias("origin_name"),
+                                col("stop_lat").alias("origin_lat"),
+                                col("stop_lon").alias("origin_lon")),
+                    on="stop_id", how="left")
 
             window_desc = Window.partitionBy("trip_id").orderBy(col("stop_sequence").desc())
             last_stops = stop_times.withColumn("rank_desc", row_number().over(window_desc)) \
                 .filter(col("rank_desc") == 1).select("trip_id", "stop_id") \
                 .join(stops.select("stop_id",
-                                   col("stop_name").alias("destination_name"),
-                                   col("stop_lat").alias("dest_lat"),
-                                   col("stop_lon").alias("dest_lon")),
-                      on="stop_id", how="left")
+                                col("stop_name").alias("destination_name"),
+                                col("stop_lat").alias("dest_lat"),
+                                col("stop_lon").alias("dest_lon")),
+                    on="stop_id", how="left")
         else:
             first_stops = trips.select(col("trip_id"), col("start_stop_id").alias("stop_id")) \
                 .join(stops.select("stop_id", col("stop_name").alias("origin_name")), on="stop_id", how="left")
