@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>ObRail Europe - Dashboard</title>
+    <title>ObRail Europe - Tableau de Bord</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -50,9 +50,9 @@
         <a class="navbar-brand fw-bold text-white" href="/"><i class="bi bi-train-front-fill me-2"></i>OBRAIL EUROPE</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ms-auto align-items-center">
-                <li class="nav-item"><a class="nav-link text-white active fw-bold" href="/">Dashboard</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/routes-page">Routes</a></li>
-                <li class="nav-item"><a class="nav-link text-white" href="/countries-page">Countries</a></li>
+                <li class="nav-item"><a class="nav-link text-white active fw-bold" href="/">Tableau de bord</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/routes-page">Lignes</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/countries-page">Pays</a></li>
                 <li class="nav-item ms-lg-3">
                     <a class="btn btn-outline-light btn-sm rounded-pill px-3" href="/api/docs" target="_blank">
                         <i class="bi bi-code-square me-1"></i> API
@@ -66,8 +66,8 @@
 <div class="container mt-5">
 
     <div class="mb-5">
-        <h1 class="fw-bold">Environmental Dashboard</h1>
-        <p class="text-secondary">Unified data warehouse — European rail network contribution to sustainable mobility.</p>
+        <h1 class="fw-bold">Tableau de Bord Environnemental</h1>
+        <p class="text-secondary">Entrepôt de données unifié — Contribution du réseau ferroviaire européen à la mobilité durable.</p>
     </div>
 
     <!-- KPI CARDS -->
@@ -75,44 +75,44 @@
         <div class="col-md-2">
             <div class="card stat-card p-3">
                 <div class="icon-square bg-indigo-soft"><i class="bi bi-map"></i></div>
-                <div class="text-muted small fw-bold text-uppercase">Total Routes</div>
+                <div class="text-muted small fw-bold text-uppercase">Lignes totales</div>
                 <h2 class="fw-bold mb-0">{{ "{:,}".format(summary.total_routes) }}</h2>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card p-3">
                 <div class="icon-square bg-blue-soft"><i class="bi bi-train-front-fill"></i></div>
-                <div class="text-muted small fw-bold text-uppercase">Day Routes</div>
+                <div class="text-muted small fw-bold text-uppercase">Lignes de jour</div>
                 <h2 class="fw-bold mb-0">{{ "{:,}".format(summary.day_routes) }}</h2>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card p-3">
                 <div class="icon-square bg-slate-soft"><i class="bi bi-moon-stars-fill"></i></div>
-                <div class="text-muted small fw-bold text-uppercase">Night Routes</div>
+                <div class="text-muted small fw-bold text-uppercase">Lignes de nuit</div>
                 <h2 class="fw-bold mb-0">{{ "{:,}".format(summary.night_routes) }}</h2>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card p-3">
                 <div class="icon-square bg-amber-soft"><i class="bi bi-globe"></i></div>
-                <div class="text-muted small fw-bold text-uppercase">Countries</div>
+                <div class="text-muted small fw-bold text-uppercase">Pays</div>
                 <h2 class="fw-bold mb-0">{{ summary.countries }}</h2>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card p-3">
                 <div class="icon-square bg-emerald-soft"><i class="bi bi-cloud-check"></i></div>
-                <div class="text-muted small fw-bold text-uppercase">CO&#x2082; Saved (T)</div>
+                <div class="text-muted small fw-bold text-uppercase">CO&#x2082; économisé (T)</div>
                 <h2 class="fw-bold mb-0 text-success">{{ "{:,.1f}".format(summary.total_co2_saved_tons) }}</h2>
             </div>
         </div>
         <div class="col-md-2">
             <div class="card stat-card p-3">
                 <div class="icon-square bg-emerald-soft"><i class="bi bi-check-circle-fill"></i></div>
-                <div class="text-muted small fw-bold text-uppercase">Viable Alt.</div>
+                <div class="text-muted small fw-bold text-uppercase">Alt. viables</div>
                 <h2 class="fw-bold mb-0 text-success">{{ "{:,}".format(summary.viable_alternatives) }}</h2>
-                <div class="text-muted" style="font-size:0.7rem;">routes under 8h</div>
+                <div class="text-muted" style="font-size:0.7rem;">lignes en moins de 8h</div>
             </div>
         </div>
     </div>
@@ -121,53 +121,53 @@
     <div class="row g-4 mb-5">
         <div class="col-12">
             <div class="emissions-section">
-                <div class="em-eyebrow">Train CO&#x2082; Savings</div>
-                <div class="em-title">How much less CO&#x2082; trains emit vs other transport modes</div>
+                <div class="em-eyebrow">Économies de CO&#x2082; par le train</div>
+                <div class="em-title">Réduction des émissions de CO&#x2082; du train par rapport aux autres modes de transport</div>
                 <div class="em-col-headers">
                     <div></div>
-                    <div>&#x2708; vs Airplane</div>
-                    <div>&#x1F697; vs Car</div>
-                    <div>&#x1F68C; vs Coach</div>
+                    <div>&#x2708; vs Avion</div>
+                    <div>&#x1F697; vs Voiture</div>
+                    <div>&#x1F68C; vs Car</div>
                 </div>
                 <div class="em-row">
                     <div class="em-mode">
                         <div class="em-icon" style="background:#eff6ff;color:#2563eb;"><i class="bi bi-train-front-fill"></i></div>
-                        Day Train
+                        Train de jour
                     </div>
                     <div class="em-stat">
                         <div class="em-pct" style="color:#10b981;">76%</div>
-                        <div class="em-sub">less CO&#x2082;</div>
+                        <div class="em-sub">de CO&#x2082; en moins</div>
                     </div>
                     <div class="em-stat">
                         <div class="em-pct" style="color:#10b981;">73%</div>
-                        <div class="em-sub">less CO&#x2082;</div>
+                        <div class="em-sub">de CO&#x2082; en moins</div>
                     </div>
                     <div class="em-stat">
                         <div class="em-pct" style="color:#f59e0b;">+59%</div>
-                        <div class="em-sub">more CO&#x2082;</div>
+                        <div class="em-sub">de CO&#x2082; en plus</div>
                     </div>
                 </div>
                 <div class="em-row">
                     <div class="em-mode">
                         <div class="em-icon" style="background:#ecfdf5;color:#10b981;"><i class="bi bi-moon-stars-fill"></i></div>
-                        Night Train
+                        Train de nuit
                     </div>
                     <div class="em-stat">
                         <div class="em-pct" style="color:#10b981;">90%</div>
-                        <div class="em-sub">less CO&#x2082;</div>
+                        <div class="em-sub">de CO&#x2082; en moins</div>
                     </div>
                     <div class="em-stat">
                         <div class="em-pct" style="color:#10b981;">89%</div>
-                        <div class="em-sub">less CO&#x2082;</div>
+                        <div class="em-sub">de CO&#x2082; en moins</div>
                     </div>
                     <div class="em-stat">
                         <div class="em-pct" style="color:#10b981;">36%</div>
-                        <div class="em-sub">less CO&#x2082;</div>
+                        <div class="em-sub">de CO&#x2082; en moins</div>
                     </div>
                 </div>
                 <p class="source-note">
                     <i class="bi bi-info-circle me-1"></i>
-                    gCO&#x2082;/pkm: Airplane 144, Car 132, Coach 22, Day Train 35, Night Train 14. Source: OurWorldInData / ICCT 2023 via Back-on-Track 2022.
+                    gCO&#x2082;/pkm : Avion 144, Voiture 132, Car 22, Train de jour 35, Train de nuit 14. Source : OurWorldInData / ICCT 2023 via Back-on-Track 2022.
                 </p>
             </div>
         </div>
@@ -176,21 +176,21 @@
     <!-- TOP ROUTES TABLE -->
     <div class="table-box mb-5 shadow-sm">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h6 class="fw-bold text-uppercase text-muted mb-0">Top 10 Routes by CO&#x2082; Savings</h6>
+            <h6 class="fw-bold text-uppercase text-muted mb-0">Top 10 des lignes par économies de CO&#x2082;</h6>
             <a href="/api/routes/export" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
-                <i class="bi bi-download me-1"></i> Export CSV
+                <i class="bi bi-download me-1"></i> Exporter CSV
             </a>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle border-0">
                 <thead>
                     <tr class="text-muted small">
-                        <th>Rank</th>
-                        <th>Route</th>
+                        <th>Rang</th>
+                        <th>Ligne</th>
                         <th>Type</th>
-                        <th class="text-center">Est. Journey Time</th>
-                        <th class="text-center">Flight Alternative</th>
-                        <th class="text-end">CO&#x2082; Saved</th>
+                        <th class="text-center">Durée estimée du trajet</th>
+                        <th class="text-center">Alternative au vol</th>
+                        <th class="text-end">CO&#x2082; économisé</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -203,9 +203,9 @@
                         </td>
                         <td>
                             {% if route[3] == 'night' %}
-                            <span class="badge-type-night">Night</span>
+                            <span class="badge-type-night">Nuit</span>
                             {% else %}
-                            <span class="badge-type-day">Day</span>
+                            <span class="badge-type-day">Jour</span>
                             {% endif %}
                         </td>
                         <td class="text-center text-muted small">
@@ -230,7 +230,7 @@
 
 <footer class="bg-dark text-white py-4 mt-5">
     <div class="container text-center">
-        <small class="opacity-50">ObRail Europe Technical Suite &copy; 2026 | MSPR Project</small>
+        <small class="opacity-50">ObRail Europe Suite Technique &copy; 2026 | Projet MSPR</small>
     </div>
 </footer>
 

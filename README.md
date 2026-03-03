@@ -44,38 +44,51 @@ ObRail Europe is an MSPR project that collects and analyzes environmental data a
 
 ```
 Obrail-MSPR/
-├── api/                          # FastAPI REST application
-│   ├── main.py                  # API routes and endpoints
-│   ├── models.py                # SQLAlchemy ORM models
-│   ├── database.py              # Database configuration
+├── api/                          # Application FastAPI (micro‑service)
+│   ├── main.py                  # Routes et endpoints de l’API
+│   ├── models.py                # Modèles SQLAlchemy
+│   ├── database.py              # Configuration de la BDD
+│   ├── requirements.txt         # dépendances spécifiques à l’API
+│   ├── Dockerfile               # image Docker pour le service
+│   ├── README.md                # doc de l’API
+│   ├── tests/                   # tests pytest de l’API
+│   │   ├── conftest.py
+│   │   ├── test_countries.py
+│   │   ├── test_dashboard.py
+│   │   ├── test_emissions.py
+│   │   ├── test_health.py
+│   │   └── test_routes.py
+│   ├── templates/              # pages HTML statiques
 │   └── __init__.py
 ├── config/
-│   └── settings.py              # Central configuration file
+│   └── settings.py              # Configuration centrale (chargement .env)
 ├── data/
-│   ├── raw/                     # Raw untransformed data
-│   │   ├── day/                 # GTFS day train data by country
-│   │   ├── night/               # Night train GTFS data
-│   │   └── co2/                 # CO2 emissions reference data
-│   ├── extracted/               # Extracted routes (CSV)
-│   └── transformed/             # Cleaned and processed data
+│   ├── raw/                     # Données brutes
+│   │   ├── day/                 # GTFS train de jour par pays
+│   │   ├── night/               # GTFS train de nuit
+│   │   └── co2/                 # Références émissions CO₂
+│   ├── extracted/               # Routes extraites (CSV)
+│   └── transformed/             # Données nettoyées et traitées
 ├── database/
-│   ├── init/                    # SQL initialization scripts
-│   │   ├── 01_datamart_schema.sql
-│   │   ├── 02_insert_dimensions.sql
-│   │   └── 03_insert_fact.sql
-│   └── README.md                # Database documentation
-├── scripts/                      # Python ETL scripts
-│   ├── day_trains.py            # Extract day train routes
-│   ├── night_trains.py          # Extract night train routes
-│   ├── clean_routes.py          # Data cleaning pipeline
-│   ├── emissions.py             # CO2 calculation logic
-│   └── calculate_co2.py         # CO2 computation utilities
-├── logs/                         # Application logs
-├── main.py                       # Main ETL orchestrator
-├── setup.py                      # Project setup and validation
-├── docker-compose.yml           # Docker services configuration
-├── requirements.txt             # Python dependencies
-└── README.md                    # This file
+│   ├── init/                    # Scripts SQL d’initialisation
+│   │   ├── 01_create_schema.sql
+│   │   ├── 02_reference_data.sql
+│   │   └── 03_test.sql
+│   └── README.md                # Documentation du schéma
+├── scripts/                      # Scripts ETL Python
+│   ├── day_trains.py            # Extraction routes de jour
+│   ├── night_trains.py          # Extraction routes de nuit
+│   ├── clean_routes.py          # Pipeline de nettoyage
+│   ├── emissions.py             # Logique de calcul CO₂
+│   └── calculate_co2.py         # Utilitaires de calcul CO₂
+
+├── logs/                         # Journaux d’exécution
+├── main.py                       # Orchestrateur ETL principal
+├── setup.py                      # Validation de l’environnement
+├── docker-compose.yml            # Configuration des services Docker
+├── requirements.txt              # Dépendances Python globales
+├── .env/.env.docker             # exemples de variables d’environnement
+└── README.md                     # Ce document
 ```
 
 ---

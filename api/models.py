@@ -28,7 +28,6 @@ class RouteBase(BaseModel):
     destination_country: Optional[str]
     distance_km: Optional[float]
     service_type: Optional[str]
-    train_type: Optional[str]
     train_gco2_pkm: Optional[float]
     plane_gco2_pkm: Optional[float]
     train_co2_kg: Optional[float]
