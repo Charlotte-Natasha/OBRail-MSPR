@@ -26,6 +26,8 @@ DATABASE_URL = os.getenv(
     f"{os.getenv('POSTGRES_DB', 'obrail_db')}"
 )
 
+DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+
 # Creates SQLAlchemy engine
 # This manages all database connections
 engine = create_engine(DATABASE_URL, pool_pre_ping=True)

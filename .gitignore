@@ -13,4 +13,4 @@ data/
 
 .pytest_cache/
 
-.logs
+logs/ .gitkeep

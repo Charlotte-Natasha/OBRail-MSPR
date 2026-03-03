@@ -20,7 +20,7 @@ def test_dashboard_contains_kpi_cards():
     """Dashboard contains the expected KPI sections"""
     response = httpx.get(f"{BASE_URL}/")
     assert response.status_code == 200
-    assert "Total Routes" in response.text
+    assert "Lignes totales" in response.text  
     assert "CO" in response.text  # CO2 section
 
 
