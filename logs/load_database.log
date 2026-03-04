@@ -31,3 +31,36 @@
 2026-02-28 14:23:12 [INFO] load_database - Top 5: Quimper → Strasbourg — 113.96 kg CO2 saved
 2026-02-28 14:23:12 [INFO] load_database - Database loading complete
 2026-02-28 14:23:12 [INFO] load_database - Database connection closed
+2026-03-03 17:04:42 [INFO] load_database - Starting database loading — ObRail Europe
+2026-03-03 17:04:42 [INFO] load_database - Connecting to PostgreSQL database
+2026-03-03 17:04:42 [INFO] load_database - Using: postgresql://obrail_user:****@localhost:5433/obrail_db
+2026-03-03 17:04:42 [INFO] load_database - Database connection successful
+2026-03-03 17:04:42 [INFO] load_database - Verifying database schema
+2026-03-03 17:04:42 [INFO] load_database - Found 4 tables: dim_countries, dim_train_types, dim_transport_modes, fact_routes
+2026-03-03 17:04:42 [INFO] load_database - All required tables exist
+2026-03-03 17:04:42 [INFO] load_database - Loading CSV data from data/transformed/environmental_impact.csv
+2026-03-03 17:04:42 [INFO] load_database - Loaded 4067 rows, 17 columns
+2026-03-03 17:04:42 [INFO] load_database - Preparing data for database insertion
+2026-03-03 17:04:42 [INFO] load_database - Prepared 4067 valid rows
+2026-03-03 17:04:42 [INFO] load_database - Updating dimension tables
+2026-03-03 17:04:42 [INFO] load_database - Processed 9 countries
+2026-03-03 17:04:42 [INFO] load_database - Transport modes already populated (8 modes)
+2026-03-03 17:04:43 [INFO] load_database - Loading 4067 routes into fact_routes
+2026-03-03 17:04:43 [INFO] load_database - Cleared existing fact_routes data
+2026-03-03 17:04:44 [INFO] load_database - Inserted rows 0 to 1000
+2026-03-03 17:04:45 [INFO] load_database - Inserted rows 1000 to 2000
+2026-03-03 17:04:46 [INFO] load_database - Inserted rows 2000 to 3000
+2026-03-03 17:04:47 [INFO] load_database - Inserted rows 3000 to 4000
+2026-03-03 17:04:47 [INFO] load_database - Inserted rows 4000 to 4067
+2026-03-03 17:04:47 [INFO] load_database - Successfully inserted 4067 routes
+2026-03-03 17:04:47 [INFO] load_database - Validating loaded data
+2026-03-03 17:04:47 [INFO] load_database - CSV rows: 4067 | Database rows: 4067
+2026-03-03 17:04:47 [INFO] load_database - No NULL values in critical columns
+2026-03-03 17:04:47 [INFO] load_database - Summary — 4,067 routes | 8 countries | avg distance: 96.99 km | total CO2 saved: 51,279.20 kg (51.28 t) | avg savings: 90.28%
+2026-03-03 17:04:47 [INFO] load_database - Top 1: Modane → Brest F — 119.37 kg CO2 saved
+2026-03-03 17:04:47 [INFO] load_database - Top 2: Bruxelles Midi → Perpignan — 118.53 kg CO2 saved
+2026-03-03 17:04:47 [INFO] load_database - Top 3: Brest F → Bourg Saint Maurice — 117.79 kg CO2 saved
+2026-03-03 17:04:47 [INFO] load_database - Top 4: Quimper → Modane — 114.09 kg CO2 saved
+2026-03-03 17:04:47 [INFO] load_database - Top 5: Quimper → Strasbourg — 113.96 kg CO2 saved
+2026-03-03 17:04:47 [INFO] load_database - Database loading complete
+2026-03-03 17:04:47 [INFO] load_database - Database connection closed
