@@ -1,100 +1,111 @@
 # ObRail Europe — Plateforme d'Analyse des Émissions CO2
 
-ObRail Europe est un projet MSPR Bloc E6.1 qui collecte et analyse les données environnementales des réseaux ferroviaires européens. La plateforme extrait des données horaires GTFS depuis plusieurs opérateurs européens, calcule les économies CO2 par rapport à l'avion en utilisant les facteurs d'émission Back-on-Track 2022, et expose les résultats via une API REST et un tableau de bord public.
+**ObRail Europe** est un projet MSPR (Bloc E6.1) visant à collecter et analyser les données environnementales des réseaux ferroviaires européens.
+
+La plateforme :
+
+- extrait des données horaires GTFS depuis plusieurs opérateurs,
+- calcule les économies de CO2 par rapport à l'avion en utilisant les facteurs d'émission _Back-on-Track 2022_,
+- expose les résultats via une API REST et un tableau de bord public.
 
 ---
 
-## Prérequis
+## 🛠️ Prérequis
 
-- Python 3.10+
-- Java 17 ou 21 (requis par PySpark)
-- Docker Desktop
+Assurez‑vous que votre machine possède :
 
----
+- **Python 3.10+**
+- **Java 17 ou 21** (nécessaire pour PySpark utilisé dans le traitement des données)
+- **Docker Desktop** (pour les services PostgreSQL et API)
 
-## Variables d'Environnement
-
-Deux fichiers `.env` sont requis à la racine du projet. Des modèles sont fournis :
-
--  `.env` Utilisé par le pipeline ETL en exécution locale.
--  `.env.docker` Utilisé par le conteneur API dans Docker. L'hôte de la base de données doit être le nom du service Docker (`obrail_db`) et non `localhost`.
+> ⚠️ Vérifiez également que les variables d'environnement sont définies (voir ci‑dessous).
 
 ---
 
-## Données GTFS
+## 🔐 Variables d'environnement
 
-Les données GTFS ne sont pas committées dans ce dépôt en raison de leur taille. Téléchargez chaque source et placez-la dans le bon sous-dossier de `data/raw/` avant de lancer le pipeline.
+Deux fichiers `.env` doivent être créés à la racine du projet. Des modèles sont fournis dans le dépôt.
 
-**Trains de jour** → `data/raw/day/`
-- France (SNCF) : [transport.data.gouv.fr](https://transport.data.gouv.fr/resources/67595?locale=en)
-- Allemagne (VBB) : [unternehmen.vbb.de](https://unternehmen.vbb.de/digitale-services/datensaetze/)
-- Suisse (SBB) : [gtfs.geops.ch](https://gtfs.geops.ch/#feeds)
-- Danemark (DSB) : [eu.data.public-transport.earth](https://eu.data.public-transport.earth/)
-
-**Trains de nuit** → `data/raw/night/`
-- ÖBB Nightjet : [data.oebb.at](https://data.oebb.at/de/datensaetze~soll-fahrplan-gtfs~)
-- DB Fernverkehr : [gtfs.de](https://gtfs.de/en/feeds/de_fv/)
-- Back-on-Track : [github.com/Back-on-Track-eu](https://github.com/Back-on-Track-eu/night-train-data/tree/main)
-
-**Données CO2** → placer `Emissions.ods` dans `data/raw/co2/`
+| Fichier       | Usage                                                                  |
+| ------------- | ---------------------------------------------------------------------- |
+| `.env`        | Pipeline ETL local                                                     |
+| `.env.docker` | Conteneur API Docker (le service DB s'appelle `obrail_db` dans Docker) |
 
 ---
 
-## Lancer le Projet
+## 📂 Sources de données GTFS
 
-### 1. Vérifier les dépendances et l'environnement
+Les données GTFS ne sont **pas** commitées en raison de leur volume. Téléchargez chaque jeu et placez-le dans le sous‑dossier correspondant sous `data/raw/`.
 
-```bash
-python setup.py
-```
+- **Trains de jour**
+  - France (SNCF) – [transport.data.gouv.fr](https://transport.data.gouv.fr)
+  - Eurostar International – (liaisons GB/FR/BE)
+  - Allemagne (VBB) – [unternehmen.vbb.de](https://unternehmen.vbb.de)
+  - Suisse (SBB) – [gtfs.geops.ch](https://gtfs.geops.ch)
+  - Danemark (DSB) – [data.public-transport.earth](https://eu.data.public-transport.earth)
 
-Vérifie que Python, Java, tous les packages requis et la structure des dossiers sont correctement en place. Corrigez les problèmes signalés avant de continuer.
+- **Trains de nuit**
+  - ÖBB Nightjet – [data.oebb.at](https://data.oebb.at)
+  - Long Distance Rail – [gtfs.de](https://gtfs.de) (DB Fernverkehr)
+  - Open Mobility Data – [mobilitydatabase.org](https://mobilitydatabase.org)
 
-### 2. Vérifier la configuration et les données GTFS
+- **CO₂**
+  Emissions.ods : Le référentiel des facteurs d'émission est basé sur les études de l'ICCT et du réseau Back-on-Track. Le fichier source peut être consulté/téléchargé via le portail de données de [Back-on-track](https://www.google.com/search?q=https://back-on-track.eu/the-carbon-footprint-of-night-trains/) .
 
-```bash
-python config/settings.py
-```
+Données CO₂ : placez le fichier `Emissions.ods` dans `data/raw/co2/`.
 
-Affiche un résumé complet de la configuration, crée les répertoires de sortie manquants, et valide quels dossiers GTFS sont présents et peuplés. Si un dossier apparaît comme manquant ou vide, téléchargez les données correspondantes avant de continuer.
-
-### 3. Démarrer les services Docker
-
-```bash
-docker compose up -d --build
-```
-
-Lance la base de données PostgreSQL et l'application FastAPI. Le schéma de la base de données est initialisé automatiquement au premier démarrage.
-
-### 4. Lancer le pipeline ETL complet
-
-```bash
-python main.py
-```
-
-Exécute les six phases en séquence — extraction nuit et jour, chargement des références CO2, transformation, calcul CO2, et chargement en base. La progression est affichée dans le terminal et les logs détaillés sont sauvegardés dans `logs/`.
-
-Une fois le pipeline terminé, le tableau de bord est disponible sur **http://localhost:8001** et la documentation API sur **http://localhost:8001/api/docs**.
+> 💡 Pour un démarrage rapide, téléchargez l’archive [data/raw zip](https://github.com/Charlotte-Natasha/OBRail-MSPR/releases/download/v1.0.0/raw.zip) et extrayez‑la dans `data/raw/`.
 
 ---
 
-## Lancer les Tests
+## 🚀 Démarrage rapide
+
+1. **Vérifier l'environnement**  
+   Exécutez le script de configuration pour valider Python, Java et les dépendances :
+
+   ```bash
+   python setup.py
+   ```
+
+2. **Valider les sources GTFS**  
+   Assurez‑vous que tous les dossiers de `data/raw/` sont correctement peuplés :
+
+   ```bash
+   python config/settings.py
+   ```
+
+3. **Lancer les services Docker**  
+   Démarre PostgreSQL et l’application FastAPI :
+
+   ```bash
+   docker compose up -d --build
+   ```
+
+4. **Exécuter le pipeline ETL complet**  
+   Extraction, transformation, calcul CO₂ puis chargement :
+   ```bash
+   python main.py
+   ```
+
+Une fois terminé, ouvrez :
+
+- Tableau de bord : http://localhost:8001
+- Documentation de l’API : http://localhost:8001/api/docs
+
+---
+
+## 🧪 Tests
+
+Lancez les tests unitaires et d’intégration :
 
 ```bash
 pytest api/tests/ -v
 ```
 
-Nécessite que les conteneurs Docker soient actifs.
+> ⚠️ Les conteneurs Docker doivent être actifs pour que les tests d’API passent.
 
 ---
 
-## Notes
+## 🧑‍💻 Contributeurs
 
-- `logs/` est exclu de git — les logs sont générés automatiquement à chaque exécution du pipeline
-- `.env` et `.env.docker` sont exclus de git — ne committez jamais vos identifiants dans le dépôt
-
----
-
-## Contributeurs
-
-ObRail Europe Data Team — MSPR Bloc E6.1 — EPSI 2026
+ObRail Europe Data Team — MSPR Bloc E6.1 — EPSI 2026
